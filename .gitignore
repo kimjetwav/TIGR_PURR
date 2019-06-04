@@ -1,0 +1,4 @@
+*.swp
+nextflow
+.nextflow
+boutiques*

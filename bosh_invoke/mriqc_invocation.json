@@ -1,0 +1,12 @@
+{
+		"bids_dir":"/bids",
+		"analysis_level":"participant",
+		"output_dir":"/output",
+		"n_procs":2,
+		"fd_thres":0.5,
+		"modalities":["T1w"],
+		"verbose_count":"-vv",
+		"work_dir":"/work_dir",
+		"verbose_reports":true
+
+}

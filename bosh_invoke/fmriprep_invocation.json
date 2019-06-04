@@ -1,0 +1,11 @@
+{
+	"bids_dir":"/bids",
+	"output_dir":"/output",
+	"analysis_level":"participant",
+	"fs_license_file":"/license/license.txt",
+	"nthreads":4,
+	"omp_nthreads":2,
+	"use_syn_sdc":true,
+	"verbosity":"-vv",
+	"use_aroma":true
+}
