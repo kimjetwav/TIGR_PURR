@@ -2,3 +2,6 @@
 nextflow
 .nextflow
 boutiques*
+.nextflow.log*
+test*
+work

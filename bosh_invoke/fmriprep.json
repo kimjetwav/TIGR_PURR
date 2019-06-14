@@ -527,7 +527,8 @@
                         "fieldmaps",
                         "slicetiming",
                         "sbref"
-                    ]
+                    ],
+		    "type":"string"
                 },
                 "type": "array"
             },

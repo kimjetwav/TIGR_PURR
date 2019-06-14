@@ -50,7 +50,7 @@ all_dirs = file(params.bids)
 bids_channel = Channel
                     .from(all_dirs.list())
                     .filter { it.contains('sub') }
-                    .take(3)
+                    .take(2)
 
 process modify_invocation{
     
@@ -91,11 +91,12 @@ process modify_invocation{
 process run_bids{
 
     beforeScript "source /etc/profile"
+    scratch true
 
-    echo true
-    
     module 'slurm'
     module '/archive/code/packages.module'
+    
+    echo true
 
     input:
     file sub_input from invoke_json
@@ -109,14 +110,23 @@ process run_bids{
     mkdir -p $workdir
     tmpdir=$(mktemp -d $workdir/$application.XXXXX)
     echo $tmpdir
+    echo $workdir
+    echo $application
+    echo $(pwd)
 
     echo bosh exec launch \
     -v !{params.bids}:/bids \
     -v !{params.out}:/output \
-    -v ${tmpdir}:/work_dir \
     -v !{params.license}:/license \
     !{params.descriptor} $(pwd)/!{sub_input} \
-    --imagepath !{params.simg} -x
+    --imagepath !{params.simg} -x --stream
+
+    bosh exec launch \
+    -v !{params.bids}:/bids \
+    -v !{params.out}:/output \
+    -v !{params.license}:/license \
+    !{params.descriptor} $(pwd)/!{sub_input} \
+    --imagepath !{params.simg} -x --stream
 
     '''
 }
