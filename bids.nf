@@ -50,7 +50,7 @@ all_dirs = file(params.bids)
 bids_channel = Channel
                     .from(all_dirs.list())
                     .filter { it.contains('sub') }
-                    .take(2)
+                    .take(30)
 
 process modify_invocation{
     
@@ -94,12 +94,12 @@ process run_bids{
     scratch true
 
     module 'slurm'
-    module '/archive/code/packages.module'
-    
-    echo true
 
     input:
     file sub_input from invoke_json
+
+    output:
+    stdout logger
 
     shell:
     '''
@@ -107,9 +107,6 @@ process run_bids{
     workdir=!{params.work}
     application=!{params.application}
 
-    mkdir -p $workdir
-    tmpdir=$(mktemp -d $workdir/$application.XXXXX)
-    echo $tmpdir
     echo $workdir
     echo $application
     echo $(pwd)
