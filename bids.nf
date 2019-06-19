@@ -7,17 +7,16 @@ if (!params.simg){
 
 }
 
-if (!params.bids || !params.out || !params.work) {
+if (!params.bids || !params.out) {
 
     println('Insufficient specification!')
-    println('Need  --bids, --out and --tmp!')
+    println('Need  --bids, --out!')
     System.exit(1)
 
 }
 
 println("BIDS Directory: $params.bids")
 println("Output directory: $params.out")
-println("Workdir: $params.work")
 
 
 //If params.application not specified, then use default bids_app
@@ -49,8 +48,7 @@ if (!params.invocation || !params.descriptor) {
 all_dirs = file(params.bids)
 bids_channel = Channel
                     .from(all_dirs.list())
-                    .filter { it.contains('sub') }
-                    .take(30)
+                    .filter { it.contains('sub-CMH0001') }
 
 process modify_invocation{
     
@@ -98,18 +96,10 @@ process run_bids{
     input:
     file sub_input from invoke_json
 
-    output:
-    stdout logger
-
     shell:
     '''
 
-    workdir=!{params.work}
     application=!{params.application}
-
-    echo $workdir
-    echo $application
-    echo $(pwd)
 
     echo bosh exec launch \
     -v !{params.bids}:/bids \
