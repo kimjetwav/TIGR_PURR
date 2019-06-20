@@ -1,5 +1,6 @@
 // INPUT SPECIFICATION
 // Don't use study, allow input to be specified freely
+
 if (!params.simg){
     println('Singularity container not specified!')
     println('Need --simg argument in Nextflow Call!')
@@ -17,7 +18,6 @@ if (!params.bids || !params.out) {
 
 println("BIDS Directory: $params.bids")
 println("Output directory: $params.out")
-
 
 //If params.application not specified, then use default bids_app
 if (!params.application) {
