@@ -41,14 +41,37 @@ if (!params.invocation || !params.descriptor) {
 
 }
 
+// Final Subjects check
+
+if (params.subjects) {
+
+    println("Subject file provided: $params.subjects")
+
+}
+
+
 //////////////////////////////////////////////////////////////
 
 // Main Processes
 
 all_dirs = file(params.bids)
+
+if (!params.subjects){
+
 bids_channel = Channel
                     .from(all_dirs.list())
                     .filter { it.contains('sub-') }
+
+}else {
+
+sublist=file("$params.subjects")
+bids_channel = Channel
+                    .from(sublist)
+                    .splitText()
+                    .filter { it.contains('sub-') }
+}
+
+bids_channel.println {"$it"}
 
 process modify_invocation{
     
