@@ -48,7 +48,7 @@ if (!params.invocation || !params.descriptor) {
 all_dirs = file(params.bids)
 bids_channel = Channel
                     .from(all_dirs.list())
-                    .filter { it.contains('sub-CMH0001') }
+                    .filter { it.contains('sub-') }
 
 process modify_invocation{
     
