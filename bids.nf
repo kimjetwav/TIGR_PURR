@@ -67,11 +67,10 @@ bids_channel = Channel
 sublist=file("$params.subjects")
 bids_channel = Channel
                     .from(sublist)
-                    .splitText()
+                    .splitText() { it.strip() }
                     .filter { it.contains('sub-') }
 }
 
-bids_channel.println {"$it"}
 
 process modify_invocation{
     
