@@ -89,9 +89,9 @@ process modify_invocation{
 process run_bids{
 
     beforeScript "source /etc/profile"
-    scratch true
 
     module 'slurm'
+    scratch true
 
     input:
     file sub_input from invoke_json
