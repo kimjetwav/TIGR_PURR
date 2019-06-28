@@ -118,7 +118,9 @@ process run_bids{
 
     beforeScript "source /etc/profile"
     scratch true
-    publishDir "$params.out/logs", mode: 'move', saveAs: {"$sub_input".replace('.json','.log') }
+    publishDir "$params.out/logs", \
+                 mode: 'move', \
+                 saveAs: {"$sub_input".replace('.json','.log') }
     module 'slurm'
 
     shell:
