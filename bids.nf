@@ -110,13 +110,26 @@ process modify_invocation{
 
 process run_bids{
 
+    input:
+    file sub_input from invoke_json
+
+    output:
+    file '.command.*' into logs
+
     beforeScript "source /etc/profile"
     scratch true
 
-    module 'slurm'
+    publishDir "$params.out/pipeline_logs", \
+                 mode: 'copy', \
+                 saveAs: { "$sub_input".replace('.json','.out')}, \
+                 pattern: '.command.out'
 
-    input:
-    file sub_input from invoke_json
+    publishDir "$params.out/pipeline_logs", \
+                 mode: 'copy', \
+                 saveAs: { "$sub_input".replace('.json','.err')}, \
+                 pattern: '.command.err'
+
+    module 'slurm'
 
     shell:
     '''
