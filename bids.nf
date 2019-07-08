@@ -114,11 +114,21 @@ process run_bids{
     file sub_input from invoke_json
 
     output:
-    file '.command.log' 
+    file '.command.*' into logs
 
     beforeScript "source /etc/profile"
     scratch true
-    publishDir "$params.out/logs", mode: 'move', saveAs: {"$sub_input".replace('.json','.log') }
+
+    publishDir "$params.out/pipeline_logs", \
+                 mode: 'copy', \
+                 saveAs: { "$sub_input".replace('.json','.out')}, \
+                 pattern: '.command.out'
+
+    publishDir "$params.out/pipeline_logs", \
+                 mode: 'copy', \
+                 saveAs: { "$sub_input".replace('.json','.err')}, \
+                 pattern: '.command.err'
+
     module 'slurm'
 
     shell:
@@ -142,5 +152,3 @@ process run_bids{
 
     '''
 }
-
-// stdout into a log file
