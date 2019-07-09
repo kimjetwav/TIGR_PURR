@@ -24,3 +24,4 @@ To learn about how you can run BIDS pipelines on any BIDS dataset go to :ref:`ge
    :caption: Contents 
 
    getting_started
+   quick_reference
