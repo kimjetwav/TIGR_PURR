@@ -71,6 +71,18 @@ bids_channel = Channel
                     .filter { it.contains('sub-') }
 }
 
+process save_invocation{
+
+    // Push input file into output folder
+
+    input:
+    file invocation from Channel.fromPath("$params.invocation")
+    
+    """
+    cp ${params.invocation} ${params.out}
+    """
+
+}
 
 process modify_invocation{
     
