@@ -29,7 +29,7 @@ Running a Default Pipeline
 You can run a default pipeline with the following lines::
 
         nextflow /archive/code/tigrlab_nextflow/bids.nf \
-        -c /archive/code/tigrlab_nextflow/<bids_app>-<version>.nf.config \
+        -c /archive/code/tigrlab_nextflow/nextflow_conf/<bids_app>-<version>.nf.config \
         --bids <path_to_bids_dir> --out <path_to_output>
 
 This will run *all* subjects within the BIDS folder
