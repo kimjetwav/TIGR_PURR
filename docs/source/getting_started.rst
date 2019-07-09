@@ -27,7 +27,7 @@ Running your own default pipeline is simple with our set-up. First open up a ter
 
         module load python/3.6.3-boutiques-0.5.20
 
-This loads in `Boutiques <https://boutiques.github.io>`_ which is required by the TIGRLAB pipeline system.
+This loads in `Boutiques <https://boutiques.github.io>`_ which is required by TIGR-PURR.
 
 .. note::
 
@@ -115,7 +115,7 @@ Under the hood, what's actually being called is::
 
 This means that you can specify any JSON file using the flag ``--invocation`` with an **invocation JSON** as an argument.
 
-Invocation JSONS are essentially command-line arguments packed neatly into a JSON file. This explicitly stores the arguments you used for a pipeline so that you can remember what exactly you ran if you need to reproduce outputs of a pipeline or want to incorporate more subjects when running a pipeline. The TIGRLab pipeline system uses `Boutiques <https://www.boutiques.github.io>`_ under the hood which handles these JSON files and translates them to command-line calls.
+Invocation JSONS are essentially command-line arguments packed neatly into a JSON file. This explicitly stores the arguments you used for a pipeline so that you can remember what exactly you ran if you need to reproduce outputs of a pipeline or want to incorporate more subjects when running a pipeline. TIGR-PURR uses `Boutiques <https://www.boutiques.github.io>`_ under the hood which handles these JSON files and translates them to command-line calls.
 
 Opening it up reveals what's actually being fed into MRIQC::
 
@@ -213,7 +213,7 @@ The right-hand side contains the MRIQC command-line argument and the left-hand s
 3. ``Description`` this is a description of what the command-line argument does in the BIDS app
 
 
-Now you can create your own custom **invocation JSON** using your favourite code editor. If you want to use it on a BIDS dataset using the TIGRLab pipeline system, then simply supply the JSON using the ``--invocation`` flag like follows::
+Now you can create your own custom **invocation JSON** using your favourite code editor. If you want to use it on a BIDS dataset using TIGR-PURR, then simply supply the JSON using the ``--invocation`` flag like follows::
 
         nextflow run /archive/code/tigrlab_nextflow/bids.nf \
         -c /archive/code/tigrlab_nextflow/nextflow_conf/mriqc-0.14.2.nf.config \
@@ -226,7 +226,7 @@ This will run the pipeline using your own custom command-line arguments!
 Running Pipelines on Other Systems (SCC/Scinet/Local)
 =====================================================
 
-The default system that the TIGRLab pipeline system will run on is on the local Kimel cluster. In the Kimel Lab if you're using an external open-source dataset such as HCP, it is recommended that you perform pre-processing using Scinet. If you're running internal study datasets (found in ``/archive/data/``), then you could use either your local computer, the SCC, or the local Kimel cluster. Specifying which system to run on is done using the ``-profile`` flag. The following options are available:
+The default system that TIGR-PURR will run on is on the local Kimel cluster. In the Kimel Lab if you're using an external open-source dataset such as HCP, it is recommended that you perform pre-processing using Scinet. If you're running internal study datasets (found in ``/archive/data/``), then you could use either your local computer, the SCC, or the local Kimel cluster. Specifying which system to run on is done using the ``-profile`` flag. The following options are available:
 
 1. ``-profile local`` - this will run locally on your computer
 2. ``-profile kimel`` - this will run on the Kimel Cluster [DEFAULT]
