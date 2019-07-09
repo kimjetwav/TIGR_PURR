@@ -27,13 +27,7 @@ Running your own default pipeline is simple with our set-up. First open up a ter
 
         module load python/3.6.3-boutiques-0.5.20
 
-This loads in `Boutiques <https://boutiques.github.io>`_ which is required by TIGR-PURR.
-
-.. note::
-
-        For more details on what exactly Boutiques is doing consult the <INSERT BOUTIQUES SECTION> page. 
-
-Once boutiques is loaded in you're ready to go! To run a pipeline some details are needed:
+This loads in `Boutiques <https://boutiques.github.io>`_ which is required by TIGR-PURR. Once boutiques is loaded in you're ready to go! To run a pipeline some details are needed:
 
 1. Your output directory
 2. The BIDS folder that you'd like to run a pipeline on
@@ -44,10 +38,6 @@ The **Nextflow Configuration** file is a short specification file which tells ou
 
 a. Which pipeline should be run
 b. How to submit the job to SLURM (across different systems) if needed.
-
-.. note::
-
-        For more details surrounding how you too can make your own configuration file check out the <INSERT NEXTFLOW CONFIGURATION> page. 
 
 **Default Pipeline** configuration files will always be found in::
 
@@ -91,10 +81,10 @@ You can run only these subjects by adding the ``--subjects`` flag to the nextflo
 That's it! Now you might be wondering **what exactly did I run with MRIQC?**
 
 
-Defining Your Own BIDS Application Arguments
+Running BIDS-apps with Custom Arguments
 ==============================================
 
-In order to make *one system run every bids pipeline* requires that we abstract away from details using additional configuration files. You probably have noticed that no where in the call to nextflow did we specify which BIDS arguments to use when running it. This is because the **Default Pipelines** use a *default set of arguments for each BIDS application*. You can find these arguments here::
+You probably have noticed that no where in the call to nextflow did we specify which BIDS arguments to use when running it. This is because the **Default Pipelines** use a *default set of arguments for each BIDS application*. You can find these arguments here::
 
         /archive/code/boutiques_jsons/invocations/
 
