@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 TIGRLab Pipelines: Utterly Reproducible Research (TIGR-PURR)
-=========================================================
+============================================================
 
 
 Welcome to the documentation page for TIGR-PURR.
