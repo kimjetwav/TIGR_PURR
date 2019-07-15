@@ -63,6 +63,7 @@ This will automatically submit SLURM jobs to the local Kimel cluster and run the
 
 
 .. _clean:
+
 Cleaning the Nextflow Work folder
 ==================================
 
@@ -106,6 +107,7 @@ That's it! Now you might be wondering **what exactly did I run with MRIQC?**
 
 
 .. _invocation:
+
 Running BIDS-apps with Custom Arguments
 ==============================================
 
@@ -249,6 +251,7 @@ For more information on Nextflow reports check out the `Nextflow Reference Docum
 
 
 .. _profiles:
+
 Running Pipelines on Other Systems (SCC/Scinet/Local)
 =====================================================
 

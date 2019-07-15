@@ -40,6 +40,11 @@ exclude_patterns = []
 
 master_doc = 'index'
 
+extensions = [
+            'sphinx.ext.autosectionlabel'
+            ]
+autosectionlabel_prefix_document = True
+
 
 # -- Options for HTML output -------------------------------------------------
 

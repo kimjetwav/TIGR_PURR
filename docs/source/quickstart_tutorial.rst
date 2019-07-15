@@ -37,7 +37,7 @@ Finally, load in the **Nextflow** module::
                 /scratch/<YOU>/nextflow_work/
 
         Which you should clean. For more information see :ref:`clean`
-You're ready to go!
+
 
 
 Dry-Runs of Pipelines
