@@ -20,7 +20,7 @@ Next we'll make a text file containing a list of participants from the SPINS stu
 
         touch sublist
         
-The sublist text file will contain a list of participants (one-per-line) that we want to run, enter the following into `sublist`::
+The sublist text file will contain a list of participants (one-per-line) that we want to run, enter the following into ``sublist``::
 
         sub-CMH0144
         sub-MRP0136
@@ -79,7 +79,7 @@ The process will run the dry-run version of MRIQC in parallel automatically!
 Cleaning up your TIGR-PURR run
 ===============================
 
-Once you're finished running a pipeline, you need to *clean out* the Nextflow working directory. By default the working directory is found by examining the `$NXF_WORK` environment variable::
+Once you're finished running a pipeline, you need to *clean out* the Nextflow working directory. By default the working directory is found by examining the ``$NXF_WORK`` environment variable::
 
         echo $NXF_WORK
 
