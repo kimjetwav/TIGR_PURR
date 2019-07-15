@@ -62,6 +62,7 @@ Let's say we want to run the ``mriqc-0.14.2`` pipeline. Then running the pipelin
 This will automatically submit SLURM jobs to the local Kimel cluster and run the **Default** MRIQC pipeline on the specified BIDS dataset. Note that this will run *all* BIDS subjects within the folder.
 
 
+.. _clean:
 Cleaning the Nextflow Work folder
 ==================================
 
@@ -247,6 +248,7 @@ Nextflow has the ability to add pipeline HTML reports which gives you informatio
 For more information on Nextflow reports check out the `Nextflow Reference Documentation <https://www.nextflow.io/docs/latest/tracing.html>`_
 
 
+.. _profiles:
 Running Pipelines on Other Systems (SCC/Scinet/Local)
 =====================================================
 

@@ -5,21 +5,91 @@
 TIGR-PURR Quickstart Tutorial
 -------------------------------------------
 
-This tutorial is meant to run you through a simple example of running TIGR-PURR pipelines on your computer. Please refer to :ref:`getting_started` for more detailed information.
+This tutorial is meant to run you through a simple example of running TIGR-PURR pipelines on your computer using data from our internal SPINS study.
+
+Please refer to :ref:`getting_started` for more detailed information about running TIGR-PURR pipelines.
+
+Setting up the Quickstart Tutorial
+=======================================
+When we're running a TIGR-PURR pipeline the first thing to do is to organize your project directory. We'll do a simple folder in scratch with the following command::
+
+        mkdir /scratch/<YOU>/nextflow_quickstart
+        cd /scratch/<YOU>/nextflow_quickstart
+
+Next we'll make a text file containing a list of participants from the SPINS study. For this tutorial we'll only run a subset of participants since running all participants will take too much time::
+
+        touch sublist
+        
+The sublist text file will contain a list of participants (one-per-line) that we want to run, enter the following into `sublist`::
+
+        sub-CMH0144
+        sub-MRP0136
+        sub-MRC0021
+
+Finally, load in the **Nextflow** module::
+
+        module load nextflow/19.0.4
+
+.. note::
+
+        This will create a directory in::
+
+                /scratch/<YOU>/nextflow_work/
+
+        Which you should clean. For more information see :ref:`clean`
+You're ready to go!
+
 
 Dry-Runs of Pipelines
 =================================================================
 
-In this quickstart tutorial we'll be running a **Dry-run** of  MRIQC on a bunch of participants from the SPINS study located in the archive. A Dry-run is a way of running pipelines without doing actual computation. It is mainly used to test that everything is working quickly before submitting a real job. Whenever you want to run a TIGR-PURR pipeline it is usually a good idea to perform a Dry-run prior to submission of the actual job. 
+In this quickstart tutorial we'll be running a **Dry-run** of MRIQC on a bunch of participants from the SPINS study located in the archive. A dry-run is a way of running pipelines without doing actual computation. It is mainly used to test that everything is working quickly before submitting a real job. Whenever you want to run a TIGR-PURR pipeline it is usually a good idea to perform a dry-run prior to submission of the actual job. 
 
 
-Most, if not all, BIDS-applications have an argument allowing you to run the pipeline dry. As such, we can run a pipeline dry by using the invocation JSON.
+Most, if not all, BIDS-applications have an argument allowing you to run the pipeline dry. As such, we can run a pipeline dry by using an invocation JSON with a dry-run argument specified. 
 
 .. note::
 
         Specifying arguments for the BIDS-app can be found in :ref:`invocation`
-        
+
+A dry-run invocation JSON for MRIQC can be found in our invocation JSON repository::
+
+        /archive/code/boutiques_jsons/invocations/dryrun_mriqc-0.14.2_invocation.json
 
 
+Running the pipeline
+======================
+
+Once you have a BIDS-app, subject list, and invocation ready to go you can run a pipeline! Let's run it on the local system (your own computer) first, but feel free to try other profiles!::
+
+        nextflow /archive/code/tigrlab_nextflow/bids.nf \
+                -c /archive/code/tigrlab_nextflow/nextflow_config/mriqc-0.14.2.nf.config \
+                --bids /archive/data/SPINS/data/bids \
+                --out /scratch/<YOU>/nextflow_quickstart \
+                --subjects /scratch/<YOU>/nextflow_quickstart/sublist \
+                --invocation /archive/code/boutiques_jsons/invocation/dryrun_mriqc-0.14.2.json \
+                -profile local
+
+The process will run the dry-run version of MRIQC in parallel automatically! 
+
+.. note::
+        Feel free to try different profiles like "kimel". For more information on profiles see: :ref:`profiles`
 
 
+Cleaning up your TIGR-PURR run
+===============================
+
+Once you're finished running a pipeline, you need to *clean out* the Nextflow working directory. By default the working directory is found by examining the `$NXF_WORK` environment variable::
+
+        echo $NXF_WORK
+
+
+To clean it out you can simply type in::
+
+        clean_nxf
+
+
+Which will clean out the subfolders in this directory.
+
+.. note::
+        For more information on cleaning working directories check out :ref:`clean`

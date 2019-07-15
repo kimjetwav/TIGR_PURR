@@ -25,4 +25,5 @@ To go through a quick example that you can run yourself, check out the :ref:`qui
    :caption: Contents 
 
    getting_started
+   quickstart_tutorial
    quick_reference
