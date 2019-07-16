@@ -25,7 +25,15 @@ Running your own Default Pipeline
 
 Running your own default pipeline is simple with our set-up. First open up a terminal, then type in::
 
-        module load nextflow/19.0.4
+        module load nextflow/19.04.1
+
+
+.. note::
+        If you're on the SCC you will need to append /KIMEL/tigrlab/ to all paths in this guide. In addition you will need to load in the Kimel module system before loading in nextflow. First type in::
+
+                module load /KIMEL/quarantine/modules/quarantine
+
+        Then proceed with loading in nextflow as stated above. 
 
 This loads in `Nextflow <https://nextflow.io>`_ and `Boutiques <https://boutiques.github.io>`_ which is required by TIGR-PURR. Once this module is loaded in you're ready to go! To run a pipeline some details are needed:
 
@@ -69,7 +77,7 @@ Cleaning the Nextflow Work folder
 
 When you run::
         
-        module load nextflow/19.0.4
+        module load nextflow/19.04.1
        
 A folder is automatically created in ::
 
@@ -274,6 +282,8 @@ Will run pipelines on the SCC.
 
 .. note::
         In order to run pipelines on the SCC *you must be on the SCC dev node!*. 
+        
+        Also note that /KIMEL/tigrlab/ is added to the paths to our filesystem, this is necessary!
 
 .. note::
         Because of the unique requirements surrounding niagara usage (every job must use 40 cores/node) running our TIGRLab pipelines isn't currently supported. We're currently working on building infrastructure to handle these sorts of requirements. The documentation will be updated as soon as the ``-profile niagara`` feature is available!
