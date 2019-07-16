@@ -1,8 +1,8 @@
-.. _quickstart_tutorial:
+.. _quickstart_tutorial_kimel:
 
 
 -------------------------------------------
-TIGR-PURR Quickstart Tutorial
+TIGR-PURR Quickstart Tutorial (Kimel Cluster)
 -------------------------------------------
 
 This tutorial is meant to run you through a simple example of running TIGR-PURR pipelines on your computer using data from our internal SPINS study.

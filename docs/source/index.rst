@@ -19,12 +19,13 @@ TIGR-PURR is a pipeline system based off a combination of `Nextflow <https://www
 
 To learn about how you can run BIDS pipelines on any BIDS dataset go to :ref:`getting_started`
 
-To go through a quick example that you can run yourself, check out the :ref:`quickstart_tutorial`
+To go through a quick example that you can run yourself, check out the quickstart tutorials.
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents 
 
    getting_started
-   quickstart_tutorial
+   quickstart_tutorial_kimel
+   quickstart_tutorial_scc
    quick_reference
