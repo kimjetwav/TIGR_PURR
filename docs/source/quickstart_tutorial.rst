@@ -82,7 +82,7 @@ Once you have a BIDS-app, subject list, and invocation ready to go you can run a
                 --bids /archive/data/SPINS/data/bids \
                 --out /scratch/<YOU>/nextflow_quickstart \
                 --subjects /scratch/<YOU>/nextflow_quickstart/sublist \
-                --invocation /archive/code/boutiques_jsons/invocation/dryrun_mriqc-0.14.2.json \
+                --invocation /archive/code/boutiques_jsons/invocations/dryrun_mriqc-0.14.2.json \
                 -profile local
 
 The process will run the dry-run version of MRIQC in parallel automatically! 
