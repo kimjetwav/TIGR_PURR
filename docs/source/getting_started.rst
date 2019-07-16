@@ -69,6 +69,11 @@ Let's say we want to run the ``mriqc-0.14.2`` pipeline. Then running the pipelin
 
 This will automatically submit SLURM jobs to the local Kimel cluster and run the **Default** MRIQC pipeline on the specified BIDS dataset. Note that this will run *all* BIDS subjects within the folder.
 
+.. note::
+        If you want to run nextflow in the background, add the argument::
+                
+                -bg
+
 
 .. _clean:
 
