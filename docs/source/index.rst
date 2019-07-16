@@ -26,6 +26,5 @@ To go through a quick example that you can run yourself, check out the quickstar
    :caption: Contents 
 
    getting_started
-   quickstart_tutorial_kimel
-   quickstart_tutorial_scc
+   quickstart_tutorial
    quick_reference

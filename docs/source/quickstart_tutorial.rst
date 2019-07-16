@@ -11,10 +11,19 @@ Please refer to :ref:`getting_started` for more detailed information about runni
 
 Setting up the Quickstart Tutorial
 =======================================
+
 When we're running a TIGR-PURR pipeline the first thing to do is to organize your project directory. We'll do a simple folder in scratch with the following command::
 
         mkdir /scratch/<YOU>/nextflow_quickstart
         cd /scratch/<YOU>/nextflow_quickstart
+
+
+.. note::
+        If you want to go through this tutorial on the SCC you must add::
+
+                /KIMEL/tigrlab/
+
+        Before every path!
 
 Next we'll make a text file containing a list of participants from the SPINS study. For this tutorial we'll only run a subset of participants since running all participants will take too much time::
 
@@ -29,6 +38,12 @@ The sublist text file will contain a list of participants (one-per-line) that we
 Finally, load in the **Nextflow** module::
 
         module load nextflow/19.0.4
+
+
+.. note::
+        If you're on the SCC you must load in our Kimel modules first before loading in nextflow::
+                
+                module load /KIMEL/quarantine/modules/quarantine
 
 .. note::
 
@@ -73,7 +88,7 @@ Once you have a BIDS-app, subject list, and invocation ready to go you can run a
 The process will run the dry-run version of MRIQC in parallel automatically! 
 
 .. note::
-        Feel free to try different profiles like "kimel". For more information on profiles see: :ref:`profiles`
+        Feel free to try different profiles like "kimel" or "scc". For more information on profiles see: :ref:`profiles`
 
 
 Cleaning up your TIGR-PURR run
