@@ -10,11 +10,18 @@ In this section, we'll begin with where you can find regularly running standard 
 Default Pipelines
 ============================
 
-We run a set of **Default Pipelines** regularly on our internal data stores of which the outputs go directly into the archive. The default pipelines will always output into::
+The **Default Pipelines** are defined as being any BIDS pipelines that are run with our internal (study-specific) settings. Any data that you find in the Kimel ``archive`` will have been run through using a **Default Pipeline**, which can be found in::
 
         /archive/data/<PROJECT>/pipelines/bids_apps/
 
-All **Default Pipeline** outputs will be pushed into this directory. Each pipeline will contain its own subfolder here and the outputs contained within this subfolder are specific to the pipeline. For example::
+These outputs will be automatically produced at regular intervals (depending on the pipeline). Outputs that are automatically run will be pushed into this directory. The particular participants that are run at any given time are those that are found in the **BIDS directory** in our archive which is found in::
+        
+        /archive/data/<PROJECT>/data/bids/
+
+These will be automatically updated on a nightly basis for all of our studies.
+
+
+Each pipeline will contain its own subfolder here and the outputs contained within this subfolder are specific to the pipeline. For example::
 
         /archive/data/SPINS/pipelines/bids_apps/freesurfer/
 
@@ -98,29 +105,6 @@ Which will wipe the contents of your nextflow working directory.
 
         Do not run `clean_nxf` when your pipeline is running! It may cause the pipeline to error out!
 
-
-
-Running Only Specific Subjects
-===============================
-
- If you wanted to run only a subset then you'll need to supply a subject list text file. For example if you make a file called ``sublist.txt`` with the following content::
-
-        sub-CMH0144
-        sub-MRP0136
-        sub-MRC0021
-
-You can run only these subjects by adding the ``--subjects`` flag to the nextflow call::
-
-        nextflow /archive/code/tigrlab_nextflow/bids.nf \
-        -c /archive/code/tigrlab_nextflow/nextflow_conf/mriqc-0.14.2.nf.config \
-        --bids <bids_dir> --out <output_dir> \
-        --subjects sublist.txt
-
-That's it! Now you might be wondering **what exactly did I run with MRIQC?**
-
-
-.. _invocation:
-
 Running BIDS-apps with Custom Arguments
 ==============================================
 
@@ -144,6 +128,11 @@ Under the hood, what's actually being called is::
         --invocation /archive/code/boutiques_jsons/invocations/mriqc-0.14.2_invocation.json
 
 This means that you can specify any JSON file using the flag ``--invocation`` with an **invocation JSON** as an argument.
+
+.. note::
+        When using your own **invocation JSON** you will need to create your own file and place it in your own directory.
+       
+     A good practice regarding using your own **invocation JSON** is to store it alongside the code that will use the outputs of the pipeline with a file-name that contains the pipeline name and version. That way when you version-control your code (which you should be using) *the invocation JSON will also be stored!*
 
 Invocation JSONS are essentially command-line arguments packed neatly into a JSON file. This explicitly stores the arguments you used for a pipeline so that you can remember what exactly you ran if you need to reproduce outputs of a pipeline or want to incorporate more subjects when running a pipeline. TIGR-PURR uses `Boutiques <https://www.boutiques.github.io>`_ under the hood which handles these JSON files and translates them to command-line calls.
 
@@ -253,6 +242,44 @@ Now you can create your own custom **invocation JSON** using your favourite code
 This will run the pipeline using your own custom command-line arguments!
 
 
+.. _dryrun:
+
+Pipeline Dry-Runs
+==================
+
+A **Dry-run** is a way of running pipelines without performing any actual computation. That way you can run a TIGR-PURR pipeline and get quick feedback on whether a pipeline will crash or not due to reasons related to you submitting the job improperly. It is usually a good idea to perform a dry-run of a pipeline prior to doing an actual run. 
+
+Most, if not all, BIDS-applications have an argument allowing you to run the pipeline dry. As such, we can run a pipeline dry by using an invocation JSON with a dry-run argument specified. 
+
+Our invocation repo will host a dry-run version of each pipeline (if available) for you to quickly test things out. The naming will look like::
+
+        /archive/code/boutiques_jsons/invocations/dryrun_<pipeline_name>-<version>_invocation.json
+
+You can specify to run a pipeline with the dry-run argument using the ``invocation`` flag.
+
+
+Running Only Specific Subjects
+===============================
+
+If you wanted to run only a subset then you'll need to supply a subject list text file. For example if you make a file called ``sublist.txt`` with the following content::
+
+        sub-CMH0144
+        sub-MRP0136
+        sub-MRC0021
+
+You can run only these subjects by adding the ``--subjects`` flag to the nextflow call::
+
+        nextflow /archive/code/tigrlab_nextflow/bids.nf \
+        -c /archive/code/tigrlab_nextflow/nextflow_conf/mriqc-0.14.2.nf.config \
+        --bids <bids_dir> --out <output_dir> \
+        --subjects sublist.txt
+
+That's it! Now you might be wondering **what exactly did I run with MRIQC?**
+
+
+.. _invocation:
+
+
 Making Pipeline Run Reports
 =============================
 
@@ -260,7 +287,28 @@ Nextflow has the ability to add pipeline HTML reports which gives you informatio
 
         -with-report <REPORT_FILE_PATH>
 
+The  ``<REPORT_FILE_PATH>`` is the full path including the report file-name in an already existing directory. 
+
+
+.. note::
+        
+        Good practices for saving reports are to save it into the same folder as your pipeline output. In addition the name of the report should ideally be descriptive of the pipeline you are running (pipeline, version, timestamp, etc..)
+
 For more information on Nextflow reports check out the `Nextflow Reference Documentation <https://www.nextflow.io/docs/latest/tracing.html>`_
+
+
+
+Pipeline Logging
+====================
+
+When running pipelines often it is desirable to have logs available for each subject in case there are issues with particular participants being run through. Logs are always stored in the output directory that you specify under a folder called ``pipeline_logs/<application_run>`` which contains two types of files named as::
+
+        <subject>.out
+        <subject>.err
+
+These are the **standard output** and **standard error** of the processes run respectively and store what would have been outputted to your terminal had you directly run the pipeline without TIGR-PURR (albeit wrapped using Boutiques). 
+
+If you are familiar with using `SLURM's <https://slurm.schedmd.com/>`_ sbatch command, then this will be exactly the outputs that SLURM produces.
 
 
 .. _profiles:

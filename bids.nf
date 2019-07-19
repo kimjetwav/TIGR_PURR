@@ -131,7 +131,7 @@ process run_bids{
     beforeScript "source /etc/profile"
     scratch true
 
-    publishDir "$params.out/pipeline_logs", \
+    publishDir "$params.out/pipeline_logs/$params.application/", \
                  mode: 'copy', \
                  saveAs: { "$sub_input".replace('.json','.out')}, \
                  pattern: '.command.out'

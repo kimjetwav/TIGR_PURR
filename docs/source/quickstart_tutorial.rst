@@ -58,19 +58,12 @@ Finally, load in the **Nextflow** module::
 Dry-Runs of Pipelines
 =================================================================
 
-In this quickstart tutorial we'll be running a **Dry-run** of MRIQC on a bunch of participants from the SPINS study located in the archive. A dry-run is a way of running pipelines without doing actual computation. It is mainly used to test that everything is working quickly before submitting a real job. Whenever you want to run a TIGR-PURR pipeline it is usually a good idea to perform a dry-run prior to submission of the actual job. 
+In this quickstart tutorial we'll be running a **Dry-run** of MRIQC on a bunch of participants from the SPINS study located in the archive. A dry-run is a way of running pipelines without doing actual computation. 
 
-
-Most, if not all, BIDS-applications have an argument allowing you to run the pipeline dry. As such, we can run a pipeline dry by using an invocation JSON with a dry-run argument specified. 
 
 .. note::
 
-        Specifying arguments for the BIDS-app can be found in :ref:`invocation`
-
-A dry-run invocation JSON for MRIQC can be found in our invocation JSON repository::
-
-        /archive/code/boutiques_jsons/invocations/dryrun_mriqc-0.14.2_invocation.json
-
+        See :ref:`dryrun' for more details about using a dry-run
 
 Running the pipeline
 ======================
