@@ -55,6 +55,8 @@ if (params.subjects) {
 // Main Processes
 
 all_dirs = file(params.bids)
+invalid_channel = Channel.create()
+bids_channel = Channel.create()
 
 if (!params.subjects){
 
@@ -65,12 +67,47 @@ bids_channel = Channel
 }else {
 
 sublist=file("$params.subjects")
-bids_channel = Channel
-                    .from(sublist)
-                    .splitText() { it.strip() }
-                    .filter { it.contains('sub-') }
+Channel
+    .from(sublist)
+    .splitText() { it.strip() }
+    .choice( bids_channel, invalid_channel  ) { it.contains('sub-') }
+    .collect()
 }
 
+
+// Deal with invalid calls
+process invalid_subject{
+
+
+    publishDir "$params.out/pipeline_logs/$params.application/", \
+                 mode: 'copy'
+
+    input:
+    val sub from invalid_channel
+
+    output:
+    file "invalid_subjects.txt" 
+
+    
+    """
+    echo "Found invalid subjects!" >> invalid_subjects.txt
+    echo ${sub} >> invalid_subjects.txt
+    """
+}
+
+
+process save_invocation{
+
+    // Push input file into output folder
+
+    input:
+    file invocation from Channel.fromPath("$params.invocation")
+    
+    """
+    cp ${params.invocation} ${params.out}
+    """
+
+}
 
 process modify_invocation{
     
@@ -119,7 +156,7 @@ process run_bids{
     beforeScript "source /etc/profile"
     scratch true
 
-    publishDir "$params.out/pipeline_logs", \
+    publishDir "$params.out/pipeline_logs/$params.application/", \
                  mode: 'copy', \
                  saveAs: { "$sub_input".replace('.json','.out')}, \
                  pattern: '.command.out'

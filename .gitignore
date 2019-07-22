@@ -7,3 +7,6 @@ test*
 work
 debug
 demo
+.python-version
+docs/build/*
+docs/build
