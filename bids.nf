@@ -56,46 +56,80 @@ if (params.subjects) {
 
 all_dirs = file(params.bids)
 invalid_channel = Channel.create()
-bids_channel = Channel.create()
+sub_channel = Channel.create()
 
-if (!params.subjects){
-
+// Store all subjects
 bids_channel = Channel
                     .from(all_dirs.list())
                     .filter { it.contains('sub-') }
 
-}else {
+// Process subject list
+if (params.subjects){
 
-sublist=file("$params.subjects")
-Channel
-    .from(sublist)
-    .splitText() { it.strip() }
-    .choice( bids_channel, invalid_channel  ) { it.contains('sub-') }
-    .collect()
+
+    //Load in sublist
+    sublist = file(params.subjects)
+    input_sub_channel = Channel.from(sublist)
+                               .splitText() { it.strip() }
+
+    process split_invalid{
+
+        publishDir "$params.out/pipeline_logs", \
+                 mode: 'copy', \
+                 saveAs: { 'invalid_subjects.log' }, \
+                 pattern: 'invalid'
+
+        input:
+        val subs from input_sub_channel.collect()
+        val available_subs from bids_channel.collect()
+
+        output:
+        file 'valid' into valid_subs
+        file 'invalid' into invalid_subs
+
+
+        """
+        #!/usr/bin/env python
+
+        import os
+        print(os.getcwd())
+
+        def nflist_2_pylist(x):
+            x = x.strip('[').strip(']')
+            x = [x.strip(' ').strip("\\n") for x in x.split(',')]
+            return x
+        
+        #Process full BIDS subjects
+        bids_subs = nflist_2_pylist("$available_subs")
+        input_subs = nflist_2_pylist("$subs")
+
+        print(input_subs)
+        valid_subs = [x for x in input_subs if x in bids_subs]
+        invalid_subs = [x for x in input_subs if x not in valid_subs]
+
+        with open('valid','w') as f:
+            f.writelines("\\n".join(valid_subs))
+
+        with open('invalid','w') as f:
+            f.writelines("\\n".join(invalid_subs)) 
+            f.write("\\n")
+
+        """
+
+    }
+
+
+    //Write into main subject channel
+    sub_channel = valid_subs
+                        .splitText() { it.strip() }
+}else{
+
+    bids_channel.into(sub_channel)
+
 }
 
 
-// Deal with invalid calls
-process invalid_subject{
-
-
-    publishDir "$params.out/pipeline_logs/$params.application/", \
-                 mode: 'copy'
-
-    input:
-    val sub from invalid_channel
-
-    output:
-    file "invalid_subjects.txt" 
-
-    
-    """
-    echo "Found invalid subjects!" >> invalid_subjects.txt
-    echo ${sub} >> invalid_subjects.txt
-    """
-}
-
-
+// Filter out invalid subjects
 process save_invocation{
 
     // Push input file into output folder
@@ -116,7 +150,7 @@ process modify_invocation{
     // subject specific invocation
 
     input:
-    val sub from bids_channel
+    val sub from sub_channel
 
     output:
     file "${sub}.json" into invoke_json
