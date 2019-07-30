@@ -62,58 +62,62 @@ sub_channel = Channel.from(to_run)
 process run_feenics{
 
     stageInMode 'copy'
-    //scratch "/tmp/"
-
-    publishDir "$params.out/${sub}/", \
-                 mode: 'move', \
-                 pattern: '*sprl*.nii.gz', \
-                 saveAs: { it.replace(".nii.gz","_denoised.nii.gz") }
+    scratch "/tmp/"
     
-    echo true
-
     input:
     set val(sub), file(sprlIN), file(sprlOUT) from sub_channel
 
     output:
-    set file("*sprlIN*"), file("*sprlOUT*") into denoised_sprls
     file("exp/$sub") into melodic_out
     
     shell:
     '''
     #Set up folder structure
     mkdir -p ./exp/!{sub}/{sprlIN,sprlOUT}
-    error
     mv !{sprlIN} ./exp/!{sub}/sprlIN/sprlIN.nii
     mv !{sprlOUT} ./exp/!{sub}/sprlOUT/sprlOUT.nii
 
-    cw=$(pwd)
-
-    #Run FeenICS stages?
+    #Run FeenICS pipeline
     s1_folder_setup.py $(pwd)/exp
-
-    #Run twice??
-    cd $cw
     s2_identify_components.py $(pwd)/exp
-
-    #Finish
-    cd $cw
     s3_remove_flagged_components.py $(pwd)/exp
 
-    #Move files for staging
-    cd $cw
-    mv exp/*nii.gz $(pwd)/
+    #Move spiral files over to subject directory
+    mv exp/*nii.gz exp/!{sub}/
+
+
     '''
 
 
 }
 
-//No longer needed
-denoised_sprls.close()
 
-//Run ICArus -- although might need to be run custom post? 
-melodic_out
-        .subscribe { log.info("$it") }
+process run_icarus{
 
+    stageInMode 'copy'
 
+    publishDir "$params.out", \
+                mode: 'copy'
+             
 
+    input:
+    file "*" from melodic_out.collect()
+
+    output:
+    file "qc_icafix.html" into icarus_out
+    file "ica_fix_report_fix4melview_Standard_thr20.csv" into fix_report
+    file "*/*" into sprl_out
+    
+    echo true
+
+    shell:
+    '''
+    #!/bin/bash
+
+    sprls=$(ls -1d */sprl*/)
+    icarus-report ${sprls}
+
+    '''
+
+}
 
