@@ -1,6 +1,7 @@
 // INPUT SPECIFICATION
 // Feed in study from DATMAN and process all sessions
 
+//TO-DO: Set up logging of subject information
 
 if (!params.study || !params.out){
 
@@ -57,6 +58,66 @@ sub_channel = Channel.from(to_run)
                         .take(3)
                         //.subscribe { println it }
 
+//GZIP files
+process gzip_nii {
+
+    stageInMode 'copy'
+    
+    input:
+    set val(sub), file(sprlIN), file(sprlOUT) from sub_channel
+
+    output:
+    set val(sub), file("${sprlIN}.gz"), file("${sprlOUT}.gz") into gzipped_channel
+
+    shell:
+    '''
+    gzip !{sprlIN} 
+    gzip !{sprlOUT}
+    '''
+
+}
+
+//Pre-process components with PRS orientation indicating they need to be reoriented
+process reorient_bad {
+
+    module 'freesurfer'
+    module 'FSL/5.0.11'
+    stageInMode 'copy'
+
+    input:
+    set val(sub), file(sprlIN), file(sprlOUT) from gzipped_channel
+
+    output:
+    set val(sub), file(sprlIN), file(sprlOUT) into oriented_subs
+
+    shell:
+    '''
+    #!/bin/bash
+    
+    orientation=$(mri_info --orientation !{sprlIN})
+
+    if [ "$orientation" = "PRS" ]; then
+
+        fslorient -deleteorient !{sprlIN}
+        fslorient -deleteorient !{sprlOUT}
+
+        fslswapdim !{sprlIN} -x -y z  !{sprlIN}
+        fslswapdim !{sprlOUT} -x -y z !{sprlOUT}
+
+        fslorient -setqformcode 1 !{sprlIN}
+        fslorient -setqformcode 1 !{sprlOUT}
+
+        #Save list of reoriented scans
+        mkdir -p !{params.out}/feenics/logs
+        reorient_list=!{params.out}/feenics/logs/reoriented.log
+        echo !{sub} >> $reorient_list
+
+    fi
+    '''
+
+
+}
+
 
 //Run subject level FeenICS
 process run_feenics{
@@ -65,7 +126,7 @@ process run_feenics{
     scratch "/tmp/"
     
     input:
-    set val(sub), file(sprlIN), file(sprlOUT) from sub_channel
+    set val(sub), file(sprlIN), file(sprlOUT) from oriented_subs
 
     output:
     file("exp/$sub") into melodic_out
@@ -74,13 +135,17 @@ process run_feenics{
     '''
     #Set up folder structure
     mkdir -p ./exp/!{sub}/{sprlIN,sprlOUT}
-    mv !{sprlIN} ./exp/!{sub}/sprlIN/sprlIN.nii
-    mv !{sprlOUT} ./exp/!{sub}/sprlOUT/sprlOUT.nii
+    mv !{sprlIN} ./exp/!{sub}/sprlIN/
+    mv !{sprlOUT} ./exp/!{sub}/sprlOUT/
+
+    #Set up logging
+    mkdir -p !{params.out}/feenics/logs
+    logfile=!{params.out}/feenics/logs/!{sub}.log
 
     #Run FeenICS pipeline
-    s1_folder_setup.py $(pwd)/exp
-    s2_identify_components.py $(pwd)/exp
-    s3_remove_flagged_components.py $(pwd)/exp
+    s1_folder_setup.py $(pwd)/exp >> $logfile 
+    s2_identify_components.py $(pwd)/exp >> $logfile
+    s3_remove_flagged_components.py $(pwd)/exp >> $logfile
 
     #Move spiral files over to subject directory
     mv exp/*nii.gz exp/!{sub}/
@@ -96,7 +161,7 @@ process run_icarus{
 
     stageInMode 'copy'
 
-    publishDir "$params.out", \
+    publishDir "$params.out/feenics", \
                 mode: 'copy'
              
 
