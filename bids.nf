@@ -85,7 +85,7 @@ if (params.subjects){
 
         output:
         file 'valid' into valid_subs
-        file 'invalid' into invalid_subs
+        file 'invalid' optional true into invalid_subs
 
 
         """
@@ -110,9 +110,11 @@ if (params.subjects){
         with open('valid','w') as f:
             f.writelines("\\n".join(valid_subs))
 
-        with open('invalid','w') as f:
-            f.writelines("\\n".join(invalid_subs)) 
-            f.write("\\n")
+        if invalid_subs:
+
+            with open('invalid','w') as f:
+                f.writelines("\\n".join(invalid_subs)) 
+                f.write("\\n")
 
         """
 
@@ -181,31 +183,26 @@ process modify_invocation{
 
 process run_bids{
 
+//    maxRetries 3
+//    errorStrategy { task.attempt <= 3 ? 'retry' : 'finish' }
+
     input:
     file sub_input from invoke_json
 
     output:
-    file '.command.*' into logs
+    file 'stderr' into log_stdout
+    file 'stdout' into log_stderr
 
     beforeScript "source /etc/profile"
     scratch true
-
-    publishDir "$params.out/pipeline_logs/$params.application/", \
-                 mode: 'copy', \
-                 saveAs: { "$sub_input".replace('.json','.out')}, \
-                 pattern: '.command.out'
-
-    publishDir "$params.out/pipeline_logs", \
-                 mode: 'copy', \
-                 saveAs: { "$sub_input".replace('.json','.err')}, \
-                 pattern: '.command.err'
 
     module 'slurm'
 
     shell:
     '''
 
-    application=!{params.application}
+    #Stop error rejection
+    set +e
 
     echo bosh exec launch \
     -v !{params.bids}:/bids \
@@ -214,12 +211,29 @@ process run_bids{
     !{params.descriptor} $(pwd)/!{sub_input} \
     --imagepath !{params.simg} -x --stream
 
+    #Make logging folder
+    logging_dir=!{params.out}/pipeline_logs/!{params.application}
+    mkdir -p ${logging_dir}
+
+    #Set up logging output
+    sub_json=!{sub_input}
+    sub=${sub_json%.json}
+    log_out=${logging_dir}/${sub}.out
+    log_err=${logging_dir}/${sub}.err
+
+
+    echo "TASK ATTEMPT !{task.attempt}" >> ${log_out}
+    echo "============================" >> ${log_out}
+    echo "TASK ATTEMPT !{task.attempt}" >> ${log_err}
+    echo "============================" >> ${log_err}
+
     bosh exec launch \
     -v !{params.bids}:/bids \
     -v !{params.out}:/output \
     -v !{params.license}:/license \
     !{params.descriptor} $(pwd)/!{sub_input} \
-    --imagepath !{params.simg} -x --stream
+    --imagepath !{params.simg} -x --stream 2>> ${log_out} \
+                                           1>> ${log_err}
 
     '''
 }
