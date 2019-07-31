@@ -183,15 +183,11 @@ process modify_invocation{
 
 process run_bids{
 
-//    maxRetries 3
-//    errorStrategy { task.attempt <= 3 ? 'retry' : 'finish' }
-
     input:
     file sub_input from invoke_json
 
-    output:
-    file 'stderr' into log_stdout
-    file 'stdout' into log_stderr
+    output: 
+    val 'pseudo_output' into pseudo_output
 
     beforeScript "source /etc/profile"
     scratch true
@@ -237,3 +233,5 @@ process run_bids{
 
     '''
 }
+
+
