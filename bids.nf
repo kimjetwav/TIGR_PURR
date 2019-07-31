@@ -2,22 +2,22 @@
 // Don't use study, allow input to be specified freely
 
 if (!params.simg){
-    println('Singularity container not specified!')
-    println('Need --simg argument in Nextflow Call!')
+    log.info('Singularity container not specified!')
+    log.info('Need --simg argument in Nextflow Call!')
     System.exit(1)
 
 }
 
 if (!params.bids || !params.out) {
 
-    println('Insufficient specification!')
-    println('Need  --bids, --out!')
+    log.info('Insufficient specification!')
+    log.info('Need  --bids, --out!')
     System.exit(1)
 
 }
 
-println("BIDS Directory: $params.bids")
-println("Output directory: $params.out")
+log.info("BIDS Directory: $params.bids")
+log.info("Output directory: $params.out")
 
 //If params.application not specified, then use default bids_app
 if (!params.application) {
@@ -29,15 +29,23 @@ if (!params.application) {
 // CHECK INVOCATION
 if (!params.invocation || !params.descriptor) {
 
-    println('Missing BOSH invocation and descriptor JSONs!')
-    println('Exiting with Error')
+    log.info('Missing BOSH invocation and descriptor JSONs!')
+    log.info('Exiting with Error')
     System.exit(1)
-
 
 }else {
 
-    println("Using Descriptor File: $params.descriptor")
-    println("Using Invocation File: $params.invocation")
+    log.info("Using Descriptor File: $params.descriptor")
+    log.info("Using Invocation File: $params.invocation")
+
+}
+
+//Overwrite
+if (!params.rewrite) {
+    log.info("--rewrite flag not used, will skip existing outputs")
+}else{
+    log.info("--rewrite flag is on! Will re-run on existing outputs!")
+    log.info("If you want to completely re-run, please delete subject output")
 
 }
 
@@ -45,7 +53,7 @@ if (!params.invocation || !params.descriptor) {
 
 if (params.subjects) {
 
-    println("Subject file provided: $params.subjects")
+    log.info("Subject file provided: $params.subjects")
 
 }
 
@@ -54,14 +62,30 @@ if (params.subjects) {
 
 // Main Processes
 
-all_dirs = file(params.bids)
+all_dirs = file(params.bids).list()
 invalid_channel = Channel.create()
 sub_channel = Channel.create()
 
 // Store all subjects
+input_dirs = new File(params.bids).list()
+output_dirs = new File(params.out).list()
+
+// Filter if rewrite
+if (params.rewrite){
+
+    to_run = input_dirs.findAll { !(output_dirs.contains(it)) }
+
+}else{
+
+    to_run = input_dirs
+
+}
+
 bids_channel = Channel
-                    .from(all_dirs.list())
+                    .from(to_run)
                     .filter { it.contains('sub-') }
+
+//Filter all subjects first
 
 // Process subject list
 if (params.subjects){
@@ -74,7 +98,7 @@ if (params.subjects){
 
     process split_invalid{
 
-        publishDir "$params.out/pipeline_logs", \
+        publishDir "$params.out/pipeline_logs/$params.application/", \
                  mode: 'copy', \
                  saveAs: { 'invalid_subjects.log' }, \
                  pattern: 'invalid'
@@ -130,8 +154,6 @@ if (params.subjects){
 
 }
 
-
-// Filter out invalid subjects
 process save_invocation{
 
     // Push input file into output folder
