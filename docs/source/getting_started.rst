@@ -274,6 +274,11 @@ You can run only these subjects by adding the ``--subjects`` flag to the nextflo
         --bids <bids_dir> --out <output_dir> \
         --subjects sublist.txt
 
+
+.. _note:
+        
+        If your subject list contains invalid subjects, subjects for which no BIDS directory exists, a list of invalid subjects will be outputted into ``<output_dir>/pipelines_logs/invalid_subjects.log``
+
 That's it! Now you might be wondering **what exactly did I run with MRIQC?**
 
 

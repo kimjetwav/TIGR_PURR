@@ -11,3 +11,4 @@ demo
 docs/build/*
 docs/build
 .nextflow*
+tests
