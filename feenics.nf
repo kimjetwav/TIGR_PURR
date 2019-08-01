@@ -124,6 +124,7 @@ process run_feenics{
 
     stageInMode 'copy'
     scratch "/tmp/"
+    containerOptions "-B ${params.out}:${params.out}"
     
     input:
     set val(sub), file(sprlIN), file(sprlOUT) from oriented_subs
