@@ -4,9 +4,8 @@
 Changes
 --------------------
 
---------------------
 v1.0.1
---------------------
+====================
 
 - [ENH] Switch to using ANSI supported logging instead of println utility in bids.nf
 - [ENH] Filter subjects based on existing output directories to bids.nf
