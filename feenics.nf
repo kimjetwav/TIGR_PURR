@@ -5,18 +5,18 @@
 
 if (!params.study || !params.out){
 
-    println("Insufficient specification")
-    println("Both --study and --out are required!")
+    log.info("Insufficient specification")
+    log.info("Both --study and --out are required!")
     System.exit(1)
 
 
 }
 
-println("Output directory: $params.out")
+log.info("Output directory: $params.out")
 
 if (params.subjects) {
 
-    println("Subject file provided: $params.subjects")
+    log.info("Subject file provided: $params.subjects")
 
 }
 
@@ -56,7 +56,7 @@ sub_channel = Channel.from(to_run)
                                     ]
                              }
                         .take(3)
-                        //.subscribe { println it }
+                        //.subscribe { log.info it }
 
 //GZIP files
 process gzip_nii {
@@ -122,6 +122,7 @@ process reorient_bad {
 //Run subject level FeenICS
 process run_feenics{
 
+    container "$params.simg"
     stageInMode 'copy'
     scratch "/tmp/"
     containerOptions "-B ${params.out}:${params.out}"
@@ -162,6 +163,7 @@ process run_icarus{
 
     stageInMode 'copy'
 
+    container "$params.simg"
     publishDir "$params.out/feenics", \
                 mode: 'copy'
              
