@@ -15,3 +15,4 @@ v1.0.1
 - [ENH] Implement orientation fix via scraping mri_info of freesurfer on each sprl scan prior to FeenICS
 - [ENH] FeenICS now outputs logs in a consistent manner to bids.nf
 - [ENH] FeenICS will filter already existing output directories
+- [ENH] FeenICS can run on SCC/Kimel/Local
