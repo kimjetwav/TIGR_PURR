@@ -16,6 +16,7 @@ v1.0.1
 - [ENH] FeenICS now outputs logs in a consistent manner to bids.nf
 - [ENH] FeenICS will filter already existing output directories
 - [ENH] FeenICS can run on SCC/Kimel/Local
+- [ENH] FeenICS now has profile configurations set up to submit on Kimel/Local/SCC
 - [FIX] FeenICS will combine spiral scans after artifact removal
 - [ENH] Fieldmap pipeline added for computing fieldmaps on CAMH GE scans (TIGRLAB internal)
 - [DOC] Updated TIGR-PURR documentation for non-BIDS internal pipelines
