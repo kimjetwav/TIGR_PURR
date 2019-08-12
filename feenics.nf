@@ -35,7 +35,6 @@ output_sessions = output_sessions_dir.list()
 //Filter for un-run sessions
 to_run = input_sessions.findAll { !(output_sessions.contains(it)) }
 
-
 //Pull subjects and scans containing SPRL-IN/SPRL-OUT
 sub_channel = Channel.from(to_run)
                         .map { n -> [
@@ -85,7 +84,8 @@ process run_feenics{
     #Move spiral files over to subject directory
     mv exp/*nii.gz exp/!{sub}/
 
-
+    #Combine spiral files
+    combinesprl exp/!{sub}/
     '''
 
 
