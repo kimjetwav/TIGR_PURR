@@ -50,7 +50,6 @@ fieldmap_input = Channel.from(to_run)
                                         new File("$nifti_dir/$x/$y").toPath().toRealPath(),
                                         new File("$nifti_dir/$x/$z").toPath().toRealPath()
                                     ] }
-                    .take(1)
 
 // With list of inputs (sub,echo1,echo2) apply fieldmap processing!
 process fieldmaps {

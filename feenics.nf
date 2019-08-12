@@ -53,8 +53,6 @@ sub_channel = Channel.from(to_run)
                                         new File("$nifti_dir/${n[0]}/${n[1][1]}").toPath().toRealPath()
                                     ]
                              }
-                        .take(3)
-                        //.subscribe { println it }
 
 
 //Run subject level FeenICS
