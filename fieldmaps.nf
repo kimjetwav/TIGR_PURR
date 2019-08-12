@@ -34,7 +34,7 @@ to_run = input_sessions.findAll { !(output_sessions.contains(it)) }
 //Pull subjects and scans with ECHO ExportInfo tag
 //And process into pairs
 fieldmap_input = Channel.from(to_run)
-                    .map { n -> [ 
+                    .map { n -> [
                                     n,
                                     new File("$nifti_dir/$n").list()
                                                              .findAll { it.matches(".*${params.echo1}.*.nii.gz") }
@@ -48,7 +48,7 @@ fieldmap_input = Channel.from(to_run)
                     .map { x,y,z -> [
                                         x,
                                         new File("$nifti_dir/$x/$y").toPath().toRealPath(),
-                                        new File("$nifti_dir/$x/$z").toPath().toRealPath()  
+                                        new File("$nifti_dir/$x/$z").toPath().toRealPath()
                                     ] }
                     .take(1)
 
