@@ -35,7 +35,7 @@ if (params.rewrite){
     to_run = input_sessions
 }
 
-f (params.subjects){
+if (params.subjects){
 
     sublist = file(params.subjects)
     input_sub_channel = Channel.from(sublist)
@@ -50,7 +50,7 @@ f (params.subjects){
 
             input:
             val subs from input_sub_channel.collect()
-            val available_subs from bids_channel.collect()
+            val available_subs from Channel.from(to_run).collect()
 
             output:
             file 'valid' into valid_subs
@@ -99,7 +99,7 @@ f (params.subjects){
 
 //Pull subjects and scans with ECHO ExportInfo tag
 //And process into pairs
-fieldmap_input = to_run
+fieldmap_input = input_subs
                     .map { n -> [
                                     n,
                                     new File("$nifti_dir/$n").list()

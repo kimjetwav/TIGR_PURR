@@ -44,7 +44,7 @@ output_sessions_dir = new File(params.out)
 output_sessions = output_sessions_dir.list()
 
 //Filter for un-run sessions
-if !(params.rewrite) {
+if (!params.rewrite) {
     to_run = input_sessions.findAll { !(output_sessions.contains(it)) }
 }else{
     to_run = input_sessions
@@ -66,7 +66,7 @@ if (params.subjects){
 
             input:
             val subs from input_sub_channel.collect()
-            val available_subs from bids_channel.collect()
+            val available_subs from Channel.from(to_run).collect()
 
             output:
             file 'valid' into valid_subs
@@ -139,6 +139,7 @@ process run_feenics{
 
     stageInMode 'copy'
     scratch "/tmp/"
+    container params.simg
     
     input:
     set val(sub), file(sprlIN), file(sprlOUT) from sub_channel
@@ -174,6 +175,7 @@ process run_feenics{
 process run_icarus{
 
     stageInMode 'copy'
+    container params.simg
 
     publishDir "$params.out", \
                 mode: 'copy'
