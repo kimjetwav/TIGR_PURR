@@ -234,10 +234,6 @@ process run_feenics{
     mv !{sprlIN} ./exp/!{sub}/sprlIN/
     mv !{sprlOUT} ./exp/!{sub}/sprlOUT/
 
-    #Set up logging
-    mkdir -p !{params.out}/feenics/logs
-    logfile=!{params.out}/feenics/logs/!{sub}.log
-
     #Run FeenICS pipeline
     (
     s1_folder_setup.py $(pwd)/exp
