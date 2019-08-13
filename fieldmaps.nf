@@ -28,18 +28,24 @@ input_sessions = input_sessions_dir.list()
 output_sessions_dir = new File(params.out)
 output_sessions = output_sessions_dir.list()
 
-//Filter for un-run sessions
-if (params.rewrite){
-    to_run = input_sessions.findAll { !(output_sessions.contains(it)) }
+//Get subjects
+if (params.subjects){
+    to_run = new File(params.subjects)
 }else{
     to_run = input_sessions
 }
 
+//Filter subjects based on outputs if rewrite isn't specified
+if (!params.rewrite) {
+    to_run = to_run.findAll { !(output_sessions.contains(it)) }
+}
+
+//Filter for unavailable subjects if specified
 if (params.subjects){
 
-    sublist = file(params.subjects)
-    input_sub_channel = Channel.from(sublist)
-                                .splitText() { it.strip() }
+    //Pull non-empty inputs
+    input_sub_channel = Channel.from(to_run)
+                                .filter{ (it?.trim()) }
 
     process split_invalid{
 
@@ -50,7 +56,7 @@ if (params.subjects){
 
             input:
             val subs from input_sub_channel.collect()
-            val available_subs from Channel.from(to_run).collect()
+            val available_subs from Channel.from(input_sessions).collect()
 
             output:
             file 'valid' into valid_subs
