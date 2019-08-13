@@ -1,11 +1,12 @@
 // INPUT SPECIFICATION
 // Feed in study from DATMAN and process all sessions
 
+//TO-DO: Set up logging of subject information
 
 if (!params.study || !params.out){
 
-    println("Insufficient specification")
-    println("Both --study and --out are required!")
+    log.info("Insufficient specification")
+    log.info("Both --study and --out are required!")
     System.exit(1)
 
 
@@ -15,7 +16,7 @@ log.info("Output directory: $params.out")
 
 if (params.subjects) {
 
-    println("Subject file provided: $params.subjects")
+    log.info("Subject file provided: $params.subjects")
 
 }
 
@@ -113,8 +114,6 @@ if (params.subjects){
     input_subs = Channel.from(to_run)
 }
 
-
-//Pull subjects and scans containing SPRL-IN/SPRL-OUT
 sub_channel = input_subs
                     .map { n -> [
                                     n,
@@ -134,16 +133,77 @@ sub_channel = input_subs
                          }
 
 
+//GZIP files
+process gzip_nii {
+
+    stageInMode 'copy'
+    
+    input:
+    set val(sub), file(sprlIN), file(sprlOUT) from sub_channel
+
+    output:
+    set val(sub), file("${sprlIN}.gz"), file("${sprlOUT}.gz") into gzipped_channel
+
+    shell:
+    '''
+    gzip !{sprlIN} 
+    gzip !{sprlOUT}
+    '''
+
+}
+
+//Pre-process components with PRS orientation indicating they need to be reoriented
+process reorient_bad {
+
+    module 'freesurfer'
+    module 'FSL/5.0.11'
+    stageInMode 'copy'
+
+    input:
+    set val(sub), file(sprlIN), file(sprlOUT) from gzipped_channel
+
+    output:
+    set val(sub), file(sprlIN), file(sprlOUT) into oriented_subs
+
+    shell:
+    '''
+    #!/bin/bash
+    
+    orientation=$(mri_info --orientation !{sprlIN})
+
+    if [ "$orientation" = "PRS" ]; then
+
+        fslorient -deleteorient !{sprlIN}
+        fslorient -deleteorient !{sprlOUT}
+
+        fslswapdim !{sprlIN} -x -y z  !{sprlIN}
+        fslswapdim !{sprlOUT} -x -y z !{sprlOUT}
+
+        fslorient -setqformcode 1 !{sprlIN}
+        fslorient -setqformcode 1 !{sprlOUT}
+
+        #Save list of reoriented scans
+        mkdir -p !{params.out}/feenics/logs
+        reorient_list=!{params.out}/feenics/logs/reoriented.log
+        echo !{sub} >> $reorient_list
+
+    fi
+    '''
+
+
+}
+
 //Run subject level FeenICS
 process run_feenics{
 
+    container "$params.simg"
     stageInMode 'copy'
     scratch "/tmp/"
     container params.simg
     containerOptions "-B ${params.out}:${params.out}"
     
     input:
-    set val(sub), file(sprlIN), file(sprlOUT) from sub_channel
+    set val(sub), file(sprlIN), file(sprlOUT) from oriented_subs
 
     output:
     file("exp/$sub") into melodic_out
@@ -165,8 +225,12 @@ process run_feenics{
 
     #Set up folder structure
     mkdir -p ./exp/!{sub}/{sprlIN,sprlOUT}
-    mv !{sprlIN} ./exp/!{sub}/sprlIN/sprlIN.nii
-    mv !{sprlOUT} ./exp/!{sub}/sprlOUT/sprlOUT.nii
+    mv !{sprlIN} ./exp/!{sub}/sprlIN/
+    mv !{sprlOUT} ./exp/!{sub}/sprlOUT/
+
+    #Set up logging
+    mkdir -p !{params.out}/feenics/logs
+    logfile=!{params.out}/feenics/logs/!{sub}.log
 
     #Run FeenICS pipeline
     (
@@ -192,7 +256,8 @@ process run_icarus{
     stageInMode 'copy'
     container params.simg
 
-    publishDir "$params.out", \
+    container "$params.simg"
+    publishDir "$params.out/feenics", \
                 mode: 'copy'
              
     input:
