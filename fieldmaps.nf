@@ -29,11 +29,77 @@ output_sessions_dir = new File(params.out)
 output_sessions = output_sessions_dir.list()
 
 //Filter for un-run sessions
-to_run = input_sessions.findAll { !(output_sessions.contains(it)) }
+if (params.rewrite){
+    to_run = input_sessions.findAll { !(output_sessions.contains(it)) }
+}else{
+    to_run = input_sessions
+}
+
+f (params.subjects){
+
+    sublist = file(params.subjects)
+    input_sub_channel = Channel.from(sublist)
+                                .splitText() { it.strip() }
+
+    process split_invalid{
+
+            publishDir "$params.out/pipeline_logs/$params.application/", \
+                     mode: 'copy', \
+                     saveAs: { 'invalid_subjects.log' }, \
+                     pattern: 'invalid'
+
+            input:
+            val subs from input_sub_channel.collect()
+            val available_subs from bids_channel.collect()
+
+            output:
+            file 'valid' into valid_subs
+            file 'invalid' optional true into invalid_subs
+
+
+            """
+            #!/usr/bin/env python
+
+            import os
+            print(os.getcwd())
+
+            def nflist_2_pylist(x):
+                x = x.strip('[').strip(']')
+                x = [x.strip(' ').strip("\\n") for x in x.split(',')]
+                return x
+            
+            #Process full BIDS subjects
+            bids_subs = nflist_2_pylist("$available_subs")
+            input_subs = nflist_2_pylist("$subs")
+
+            print(input_subs)
+            valid_subs = [x for x in input_subs if x in bids_subs]
+            invalid_subs = [x for x in input_subs if x not in valid_subs]
+
+            with open('valid','w') as f:
+                f.writelines("\\n".join(valid_subs))
+
+            if invalid_subs:
+
+                with open('invalid','w') as f:
+                    f.writelines("\\n".join(invalid_subs)) 
+                    f.write("\\n")
+
+            """
+
+    }
+
+    input_subs = valid_subs
+                    .splitText() { it.strip() }
+
+
+}else{
+    input_subs = Channel.from(to_run)
+}
 
 //Pull subjects and scans with ECHO ExportInfo tag
 //And process into pairs
-fieldmap_input = Channel.from(to_run)
+fieldmap_input = to_run
                     .map { n -> [
                                     n,
                                     new File("$nifti_dir/$n").list()
