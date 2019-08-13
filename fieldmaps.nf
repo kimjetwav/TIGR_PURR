@@ -143,11 +143,29 @@ process fieldmaps {
     '''
     #!/bin/bash
 
+
+    #Set up logging
+    logging_dir=!{params.out}/pipeline_logs/!{params.application}
+    mkdir -p ${logging_dir}
+
+    #Get processID
+    pid=$$
+    log_out=${logging_dir}/!{sub}_${pid}.out
+    log_err=${logging_dir}/!{sub}_${pid}.err
+
+    echo "TASK ATTEMPT !{task.attempt}" >> ${log_out}
+    echo "============================" >> ${log_out}
+    echo "TASK ATTEMPT !{task.attempt}" >> ${log_err}
+    echo "============================" >> ${log_err}
+
     FM65=!{echo1}
     FM85=!{echo2}
 
-    ####split (pre) fieldmap files
+    echo "Using ECHO1 $FM65" >> ${log_out}
+    echo "Using ECHO2 $FM85" >> ${log_out}
 
+    ####split (pre) fieldmap files and log
+    (
     fslsplit ${FM65} split65 -t
     bet split650000 65mag -R -f 0.5 -m
     fslmaths split650002 -mas 65mag_mask 65realm
@@ -180,6 +198,7 @@ process fieldmaps {
     ####copy in geometry information
     fslcpgeom ${FM65} fieldmap.nii.gz -d
     fslcpgeom ${FM65} magnitude.nii.gz -d
+    ) 2>> ${log_err} 1>> ${log_out}
 
     '''
 }

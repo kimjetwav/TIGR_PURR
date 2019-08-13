@@ -140,6 +140,7 @@ process run_feenics{
     stageInMode 'copy'
     scratch "/tmp/"
     container params.simg
+    containerOptions "-B ${params.out}:${params.out}"
     
     input:
     set val(sub), file(sprlIN), file(sprlOUT) from sub_channel
@@ -149,15 +150,30 @@ process run_feenics{
     
     shell:
     '''
+
+    #Set up logging
+    logging_dir=!{params.out}/pipeline_logs/!{params.application}
+    mkdir -p ${logging_dir}
+    log_out=${logging_dir}/!{sub}.out
+    log_err=${logging_dir}/!{sub}.err
+
+    #Record task attempt
+    echo "TASK ATTEMPT !{task.attempt}" >> ${log_out}
+    echo "============================" >> ${log_out}
+    echo "TASK ATTEMPT !{task.attempt}" >> ${log_err}
+    echo "============================" >> ${log_err}
+
     #Set up folder structure
     mkdir -p ./exp/!{sub}/{sprlIN,sprlOUT}
     mv !{sprlIN} ./exp/!{sub}/sprlIN/sprlIN.nii
     mv !{sprlOUT} ./exp/!{sub}/sprlOUT/sprlOUT.nii
 
     #Run FeenICS pipeline
+    (
     s1_folder_setup.py $(pwd)/exp
     s2_identify_components.py $(pwd)/exp
     s3_remove_flagged_components.py $(pwd)/exp
+    ) 2>> ${log_err} 1>> ${log_out}
 
     #combine spiral files
     combinesprl exp/
@@ -171,7 +187,6 @@ process run_feenics{
 
 }
 
-
 process run_icarus{
 
     stageInMode 'copy'
@@ -180,7 +195,6 @@ process run_icarus{
     publishDir "$params.out", \
                 mode: 'copy'
              
-
     input:
     file "*" from melodic_out.collect()
 
