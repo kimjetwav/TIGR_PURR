@@ -128,12 +128,12 @@ process fieldmaps {
 
     module "FSL/5.0.11"
 
-    publishDir "$params.out/$sub", \
+    publishDir "$params.out/${params.application}/$sub", \
                 mode: 'copy', \
                 pattern:  "magnitude.nii.gz" , \
                 saveAs: { echo1.getName().replace("$params.echo1","MAG") }
 
-    publishDir "$params.out/$sub", \
+    publishDir "$params.out/${params.application}/$sub", \
                 mode: 'copy', \
                 pattern:  "fieldmap.nii.gz" , \
                 saveAs: { echo1.getName().replace("$params.echo1","FIELDMAP") }

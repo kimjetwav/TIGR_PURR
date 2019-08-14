@@ -259,7 +259,7 @@ process run_icarus{
     container params.simg
 
     container "$params.simg"
-    publishDir "$params.out/feenics", \
+    publishDir "$params.out/${params.application}", \
                 mode: 'copy'
              
     input:
