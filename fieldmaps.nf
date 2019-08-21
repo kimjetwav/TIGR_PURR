@@ -30,13 +30,13 @@ output_sessions = output_sessions_dir.list()
 
 //Get subjects
 if (params.subjects){
-    to_run = new File(params.subjects)
+    to_run = new File(params.subjects).readLines()
 }else{
     to_run = input_sessions
 }
 
 //Filter subjects based on outputs if rewrite isn't specified
-if (!params.rewrite) {
+if (!params.rewrite && output_sessions) {
     to_run = to_run.findAll { !(output_sessions.contains(it)) }
 }
 

@@ -41,18 +41,18 @@ input_sessions_dir = new File(nifti_dir)
 input_sessions = input_sessions_dir.list()
 
 //Outputs
-output_sessions_dir = new File(params.out)
+output_sessions_dir = new File("$params.out/$params.application")
 output_sessions = output_sessions_dir.list()
 
 //Get subjects
 if (params.subjects){
-    to_run = new File(params.subjects)
+    to_run = new File(params.subjects).readLines()
 }else{
     to_run = input_sessions
 }
 
 //Filter subjects based on outputs if rewrite isn't specified
-if (!params.rewrite) {
+if (!params.rewrite && output_sessions) {
     to_run = to_run.findAll { !(output_sessions.contains(it)) }
 }
 
@@ -189,8 +189,8 @@ process reorient_bad {
         fslorient -setqformcode 1 !{sprlOUT}
 
         #Save list of reoriented scans
-        mkdir -p !{params.out}/feenics/logs
-        reorient_list=!{params.out}/feenics/logs/reoriented.log
+        mkdir -p !{params.out}/feenics/
+        reorient_list=!{params.out}/feenics/reoriented.log
         echo !{sub} >> $reorient_list
 
     fi
@@ -207,12 +207,18 @@ process run_feenics{
     scratch "/tmp/"
     container params.simg
     containerOptions "-B ${params.out}:${params.out}"
+
+    //Move things to output directory
+    publishDir "$params.out/${params.application}", \
+                mode: 'move',
+                saveAs: { "$sub" }
     
     input:
     set val(sub), file(sprlIN), file(sprlOUT) from oriented_subs
 
     output:
     file("exp/$sub") into melodic_out
+    val "$sub" into pseudo_out
     
     shell:
     '''
@@ -259,16 +265,16 @@ process run_icarus{
     container params.simg
 
     container "$params.simg"
+    containerOptions "-H $params.out:$params.out"
+
     publishDir "$params.out/${params.application}", \
                 mode: 'copy'
              
     input:
-    file "*" from melodic_out.collect()
+    val "*" from pseudo_out.collect()
 
     output:
-    file "qc_icafix.html" into icarus_out
-    file "ica_fix_report_fix4melview_Standard_thr20.csv" into fix_report
-    file "*/*" into sprl_out
+    val 'pseudo' into pseudo_out2
     
     echo true
 
@@ -276,6 +282,7 @@ process run_icarus{
     '''
     #!/bin/bash
 
+    cd !{params.out}/!{params.application}
     sprls=$(ls -1d */sprl*/)
     icarus-report ${sprls}
 

@@ -122,7 +122,7 @@ if (params.subjects){
             x = x.strip('[').strip(']')
             x = [x.strip(' ').strip("\\n") for x in x.split(',')]
             return x
-        
+
         #Process full BIDS subjects
         bids_subs = nflist_2_pylist("$available_subs")
         input_subs = nflist_2_pylist("$subs")
@@ -137,7 +137,7 @@ if (params.subjects){
         if invalid_subs:
 
             with open('invalid','w') as f:
-                f.writelines("\\n".join(invalid_subs)) 
+                f.writelines("\\n".join(invalid_subs))
                 f.write("\\n")
 
         """
@@ -160,15 +160,24 @@ process save_invocation{
 
     input:
     file invocation from Channel.fromPath("$params.invocation")
-    
-    """
-    cp ${params.invocation} ${params.out}
-    """
+
+    shell:
+    '''
+
+    invoke_name=$(basename !{params.invocation})
+
+    #If files are identical, no point of copying
+    DIFF=$(diff !{params.invocation} !{params.out}/$invoke_name)
+
+    if [ "$DIFF" != "" ]; then
+        cp -n !{params.invocation} !{params.out}
+    fi
+    '''
 
 }
 
 process modify_invocation{
-    
+
     // Takes a BIDS subject identifier
     // Modifies the template invocation json and outputs
     // subject specific invocation
@@ -192,14 +201,14 @@ process modify_invocation{
 
     with open(invoke_file,'r') as f:
         j_dict = json.load(f)
-    
+
     j_dict.update({'participant_label' : [x]})
 
     with open(out_file,'w') as f:
         json.dump(j_dict,f,indent=4)
 
-    """ 
-    
+    """
+
 
 }
 
@@ -208,9 +217,10 @@ process run_bids{
     input:
     file sub_input from invoke_json
 
-    output: 
+    output:
     val 'pseudo_output' into pseudo_output
 
+    echo true
     beforeScript "source /etc/profile"
     scratch true
 
@@ -221,6 +231,8 @@ process run_bids{
 
     #Stop error rejection
     set +e
+
+    echo !{sub_input}
 
     echo bosh exec launch \
     -v !{params.bids}:/bids \
