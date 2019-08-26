@@ -60,7 +60,6 @@ if (!params.config) {
 }
 
 //Output specific parsing
-//FMRIPREP
 basepath = "$params.derivatives/ciftify/sub-*/MNINonLinear/Results/*/"
 if (params.type == "volume"){
 
@@ -79,7 +78,6 @@ filtered_input = input_files
 //Now process using cifti cleaning
 process clean_file {
 
-
     container "$params.simg"
     publishDir "$params.out", mode: 'move'
 
@@ -94,5 +92,4 @@ process clean_file {
     ciftify_clean_img !{imagefile}    
     '''
     
-
 }
