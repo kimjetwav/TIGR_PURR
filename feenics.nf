@@ -231,8 +231,10 @@ process run_feenics{
 
     #Record task attempt
     echo "TASK ATTEMPT !{task.attempt}" >> ${log_out}
+    echo "WORKDIR: $(pwd)"              >> ${log_out}
     echo "============================" >> ${log_out}
     echo "TASK ATTEMPT !{task.attempt}" >> ${log_err}
+    echo "WORKDIR: $(pwd)"              >> ${log_err}
     echo "============================" >> ${log_err}
 
     #Set up folder structure
