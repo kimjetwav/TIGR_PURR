@@ -7,7 +7,7 @@ Run cifti_clean_img on a set of input derivatives
 
 USAGE
 
-nextflow run cifti_clean.nf [options...] --derivatives <DERIVS> --out <OUT> --type (ciftify|fmriprep)
+nextflow run cifti_clean.nf [options...] --derivatives <DERIVS> --out <OUT> --type (surface|volume)
 
 DESCRIPTION
 
