@@ -1,0 +1,36 @@
+cifti_clean Nextflow Pipeline
+==============================
+
+
+Run cifti_clean_img on a set of input derivatives
+
+
+USAGE
+
+nextflow run cifti_clean.nf [options...] --derivatives <DERIVS> --out <OUT> --type (ciftify|fmriprep)
+
+DESCRIPTION
+
+	--derivatives				Path to BIDS derivatives directory
+	--out					Path to output directory
+	--type					Type of derivative to use (fmriprep or ciftify)
+
+OPTIONAL ARGUMENTS (default values pre-specified)
+
+	--simg					Which singularity image of ciftify to use 
+						($simg)
+	--config				Ciftify cleaning configuration file to use 
+						($config)
+	--help					Print usage (this message)
+	--task					Parse a specific task (None)
+
+SUPPORTED PROFILES
+
+	-profile (kimel|scc|local)		On which system to run the cifti_clean pipeline
+
+NOTES
+
+Only fmriprep and ciftify derivatives are supported for cleaning. All files will be dumped into a single output directory for analysis. In addition, the cleaning configuration file used for nuisance regression will also be outputted into the output folder for tracking what was used to clean the data.
+
+
+The default config file which specifies default values for --simg and --config can be found in tigrlab_nextflow/nextflow_config/cifti_clean.nf.config. 
