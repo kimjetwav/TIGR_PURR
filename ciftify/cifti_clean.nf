@@ -1,5 +1,15 @@
 import groovy.json.JsonSlurper
 
+print_help = false
+
+usage = file("${baseDir.getParent()}/usage/cifti_clean_usage")
+default_simg = file(params.simg).getBaseName()
+bindings = ["simg":"$default_simg",
+            "config":"$params.config"]
+
+engine = new groovy.text.SimpleTemplateEngine()
+toprint = engine.createTemplate(usage.text).make(bindings)
+
 //Print usage if --help option used
 if (params.help) {
 
@@ -11,15 +21,14 @@ if (params.help) {
 
     engine = new groovy.text.SimpleTemplateEngine()
     toprint = engine.createTemplate(usage.text).make(bindings)
-    print(toprint.toString())
-    return
+    print_help = true
 
 }
 
 if (!params.simg){
     log.info('Singularity container not specified!')
     log.info('Need --simg argument in Nextflow Call!')
-    return
+    print_help = true
 
 }
 
@@ -27,7 +36,7 @@ if (!params.derivatives) {
 
     log.info('Insufficient specification!')
     log.info('Need --derivatives!')
-    return
+    print_help = true
 
 }
 
@@ -35,7 +44,7 @@ if (!params.out) {
 
     log.info('Insufficient specification!')
     log.info('Need --out')
-    return
+    print_help = true
 
 }
 
@@ -43,12 +52,12 @@ if (!params.type) {
 
     log.info('Please specify type of derivative using --type!')
     log.info('Must be "volume" or "surface"')
-    return
+    print_help = true
 
 }else if ( params.type != 'volume' && params.type != 'surface' ) {
 
     log.info('--type must be "volume" or "surface"')
-    return
+    print_help = true
 
 }
 
@@ -56,6 +65,13 @@ if (!params.config) {
 
     log.info("Insufficient specification")
     log.info("Need cifti cleaning config file --config")
+    print_help = true
+
+}
+
+if (print_help) {
+
+    print(toprint)
     return
 
 }
@@ -73,42 +89,38 @@ if (params.type == "volume"){
 }
 
 //Use filtering
+no_smooth_input = Channel.create()
+smooth_input = Channel.create()
+
 filtered_input = input_files
                         .filter { params.task ? it.getBaseName().contains(params.task) : true }
+                        .tap ( no_smooth_input )
+                        .map { n -> [
+                                        n,
+                                        (n =~ /sub-.+?(?=\/MNI)/)[0],
+                                    ]
+                             }
+                        .map { n,s ->   [
+                                            n,
+                                            s,
+                                            "$params.derivatives/$s/MNINonLinear/fsaverage_LR32k"
+                                        ]
+                             }
+                        .map { n,s,p ->   [
+                                            n,
+                                            file("$p/${s}.L.midthickness.surf.gii"),
+                                            file("$p/${s}.R.midthickness.surf.gii")
+                                        ]
+                             }
 
 
-//If the user specifies surface and smoothwm is used then must attach additional files!
+//Flag for whether to use smoothing or not
 if (params.type == 'surface'){
-
 
     //Read in the cleaning config file
     config = new File(params.config)
     inputjson = new JsonSlurper().parse(config)
     smooth_enabled = inputjson.find { it.key == '--smooth-fwhm' }
-
-    //If smoothing option is found, provide a left and right surface
-    if smooth_enabled {
-
-        //Regex match the subject directory then add L/R surfaces
-        filtered_input = filtered_input
-                                .map { n -> [
-                                                n,
-                                                (n =~ /sub-.+?(?=\/MNI)/)[0],
-                                            ]
-                                     }
-                                .map { n,s ->   [
-                                                    n,
-                                                    s,
-                                                    "$params.derivatives/$s/MNINonLinear/fsaverage_LR32k"
-                                                ]
-                                     }
-                                .map { n,s,p ->   [
-                                                    n,
-                                                    file("$p/${s}.L.midthickness.surf.gii"),
-                                                    file("$p/${s}.R.midthickness.surf.gii")
-                                                ]
-                                     }
-    }
 
 }
 
@@ -119,13 +131,13 @@ process clean_file_no_smoothing {
     publishDir "$params.out", mode: 'move'
 
     input:
-    file imagefile from filtered_input
+    file imagefile from no_smooth_input
 
     output:
-    file "*_clean*" into cleaned_img
+    file "*_clean*" into unsmoothed_cleaned_img
 
     when: 
-    !smooth_enabled
+    !(smooth_enabled)
 
     shell:
     '''
@@ -134,7 +146,6 @@ process clean_file_no_smoothing {
     
 }
 
-
 //If using smoothing
 process clean_file_smoothing {
 
@@ -142,13 +153,13 @@ process clean_file_smoothing {
     publishDir "$params.out", mode: 'move'
 
     input:
-    set file(imagefile), file(L), file(R) from filtered_input
+    set file(imagefile), file(L), file(R) from smooth_input
 
     output:
-    file "*_clean*" into cleaned_img
+    file "*_clean*" into smoothed_cleaned_img
 
     when: 
-    smooth_enabled
+    (smooth_enabled)
 
     shell:
     '''
