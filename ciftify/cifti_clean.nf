@@ -13,14 +13,7 @@ toprint = engine.createTemplate(usage.text).make(bindings)
 //Print usage if --help option used
 if (params.help) {
 
-    usage = file("${baseDir.getParent()}/usage/cifti_clean_usage")
-    default_simg = file(params.simg).getBaseName()
-
-    bindings = ["simg":"$default_simg",
-                "config":"$params.config"]
-
-    engine = new groovy.text.SimpleTemplateEngine()
-    toprint = engine.createTemplate(usage.text).make(bindings)
+    print(toprint)
     return
 
 }
