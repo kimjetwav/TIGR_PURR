@@ -21,7 +21,7 @@ if (params.help) {
 
     engine = new groovy.text.SimpleTemplateEngine()
     toprint = engine.createTemplate(usage.text).make(bindings)
-    print_help = true
+    return
 
 }
 
