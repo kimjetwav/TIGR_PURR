@@ -1,5 +1,6 @@
-// INPUT SPECIFICATION
+import groovy.json.JsonSlurper
 
+//Print usage if --help option used
 if (params.help) {
 
     usage = file("${baseDir.getParent()}/usage/cifti_clean_usage")
@@ -75,8 +76,44 @@ if (params.type == "volume"){
 filtered_input = input_files
                         .filter { params.task ? it.getBaseName().contains(params.task) : true }
 
-//Now process using cifti cleaning
-process clean_file {
+
+//If the user specifies surface and smoothwm is used then must attach additional files!
+if (params.type == 'surface'){
+
+
+    //Read in the cleaning config file
+    config = new File(params.config)
+    inputjson = new JsonSlurper().parse(config)
+    smooth_enabled = inputjson.find { it.key == '--smooth-fwhm' }
+
+    //If smoothing option is found, provide a left and right surface
+    if smooth_enabled {
+
+        //Regex match the subject directory then add L/R surfaces
+        filtered_input = filtered_input
+                                .map { n -> [
+                                                n,
+                                                (n =~ /sub-.+?(?=\/MNI)/)[0],
+                                            ]
+                                     }
+                                .map { n,s ->   [
+                                                    n,
+                                                    s,
+                                                    "$params.derivatives/$s/MNINonLinear/fsaverage_LR32k"
+                                                ]
+                                     }
+                                .map { n,s,p ->   [
+                                                    n,
+                                                    file("$p/${s}.L.midthickness.surf.gii"),
+                                                    file("$p/${s}.R.midthickness.surf.gii")
+                                                ]
+                                     }
+    }
+
+}
+
+//If not using smoothing
+process clean_file_no_smoothing {
 
     container "$params.simg"
     publishDir "$params.out", mode: 'move'
@@ -87,9 +124,36 @@ process clean_file {
     output:
     file "*_clean*" into cleaned_img
 
+    when: 
+    !smooth_enabled
+
     shell:
     '''
     ciftify_clean_img !{imagefile}    
     '''
     
 }
+
+
+//If using smoothing
+process clean_file_smoothing {
+
+    container "$params.simg"
+    publishDir "$params.out", mode: 'move'
+
+    input:
+    set file(imagefile), file(L), file(R) from filtered_input
+
+    output:
+    file "*_clean*" into cleaned_img
+
+    when: 
+    smooth_enabled
+
+    shell:
+    '''
+    ciftify_clean_img !{imagefile} --left-surface=!{L} --right-surface=!{R} 
+    '''
+
+}
+

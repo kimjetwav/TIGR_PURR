@@ -34,3 +34,5 @@ Only fmriprep and ciftify derivatives are supported for cleaning. All files will
 
 
 The default config file which specifies default values for --simg and --config can be found in tigrlab_nextflow/nextflow_config/cifti_clean.nf.config. 
+
+If smoothing is specified in the cleaning configuration file (--smooth-fwhm), then midthickness files from fsaverage_LR32k is used as the smoothing surface.
