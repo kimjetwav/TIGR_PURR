@@ -1,8 +1,8 @@
 .. _getting_started:
 
---------------------
-Getting started
---------------------
+-----------------------------------------
+Getting started with TIGR-PURR BIDS-apps
+-----------------------------------------
 
 In this section, we'll begin with where you can find regularly running standard BIDS pipelines. Then we will discuss how you can run your own standard pipeline (for example if you wanted outputs for a specific dataset quickly, although careful with space usage!). Finally we'll go over how you can customize arguments for either the BIDS application you want to run or SLURM if your requirements are more complex. 
 
@@ -67,11 +67,18 @@ Here you will find a bunch of files that look like the following::
 
 Every **Nextflow Configuration** file ends with a ``*.nf.config`` and always begins with ``<bidsapp>-<version>``. This way you know exactly which version of a pipeline you're running!
 
+.. note::
+        Since TIGR-PURR is expanding past just BIDS applications there are additional configuration files available
+        a more robust organizational system is coming up in the near future.
+
 Let's say we want to run the ``mriqc-0.14.2`` pipeline. Then running the pipeline is done with the following command::
 
         nextflow /archive/code/tigrlab_nextflow/bids.nf \
         -c /archive/code/tigrlab_nextflow/nextflow_config/mriqc-0.14.2.nf.config \
         --bids <bids_dir> --out <output_dir> 
+
+.. note::
+        The script /archive/code/tigrlab_nextflow/bids.nf is the central BIDS script for running *any BIDS application through TIGR-PURR*
 
 
 This will automatically submit SLURM jobs to the local Kimel cluster and run the **Default** MRIQC pipeline on the specified BIDS dataset. Note that this will run *all* BIDS subjects within the folder.
