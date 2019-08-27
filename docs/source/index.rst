@@ -21,6 +21,8 @@ TIGR-PURR is a pipeline system based off of `Nextflow <https://www.nextflow.io>`
 A central feature of TIGR-PURR is its ability to run *any BIDS-application* through implementation of `Boutiques <https://www.boutiques.github.io>`_ under the hood. To learn about how you can run BIDS pipelines on any BIDS dataset check out :ref:`getting_started`. To go through an example running a BIDS application try the :ref:`quickstart_tutorial`
 
 
+Finally, due to the needs for easily distributed post- and pre-processing of data that aren't applicable in the context of BIDS. TIGR-PURR is expanding outside of BIDS! Check out :ref:`not_bids` for information about non-BIDS-application pipelines (such as parallelized cifti_clean on ciftify outputs)
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents 
