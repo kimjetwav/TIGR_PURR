@@ -7,7 +7,7 @@ TIGRLab Pipelines: Utterly Reproducible Research (TIGR-PURR)
 ============================================================
 
 Welcome to the documentation page for TIGR-PURR.
-This is where you'll find information about how to run the lab's supported pipelines yourself as well as the various configuration options available to you. 
+This is where you'll find information about how to run the lab's supported pipelines yourself as well as the various configuration options available to you.
 
 TIGR-PURR is a pipeline system based off of `Nextflow <https://www.nextflow.io>`_. TIGR-PURR allows you to run various pipelines in a distributed fashion removing most of work dealing with cluster-specific scripting. Currently TIGR-PURR can be run on:
 
@@ -25,7 +25,7 @@ Finally, due to the needs for easily distributed post- and pre-processing of dat
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents 
+   :caption: Contents
 
    getting_started
    quickstart_tutorial
