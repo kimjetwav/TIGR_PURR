@@ -30,7 +30,7 @@ SUPPORTED PROFILES
 
 NOTES
 
-Only fmriprep and ciftify derivatives are supported for cleaning. All files will be dumped into a single output directory for analysis. In addition, the cleaning configuration file used for nuisance regression will also be outputted into the output folder for tracking what was used to clean the data.
+Only fmriprep and ciftify derivatives are supported for cleaning. All files will be dumped into a single output directory for analysis. In addition, the cleaning configuration file used for nuisance regression will also be copied into the output folder for tracking what was used to clean the data.
 
 
 The default config file which specifies default values for --simg and --config can be found in tigrlab_nextflow/nextflow_config/cifti_clean.nf.config. 

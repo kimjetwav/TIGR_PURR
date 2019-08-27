@@ -19,6 +19,7 @@ if (params.help) {
 }
 
 if (!params.simg){
+
     log.info('Singularity container not specified!')
     log.info('Need --simg argument in Nextflow Call!')
     print_help = true
