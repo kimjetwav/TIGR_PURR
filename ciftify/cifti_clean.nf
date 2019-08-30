@@ -85,8 +85,10 @@ if (params.type == "volume"){
 //Use filtering
 no_smooth_input = Channel.create()
 smooth_input = Channel.create()
+confounds_matcher = Channel.create()
 
-filtered_input = input_files
+//Get associated L/R midthickness files
+smooth_input =  input_files
                         .filter { params.task ? it.getBaseName().contains(params.task) : true }
                         .tap ( no_smooth_input )
                         .map { n -> [
@@ -94,10 +96,11 @@ filtered_input = input_files
                                         (n =~ /sub-.+?(?=\/MNI)/)[0],
                                     ]
                              }
+                        .tap ( confounds_matcher )
                         .map { n,s ->   [
                                             n,
                                             s,
-                                            "$params.derivatives/$s/MNINonLinear/fsaverage_LR32k"
+                                            "$params.derivatives/ciftify/$s/MNINonLinear/fsaverage_LR32k",
                                         ]
                              }
                         .map { n,s,p ->   [
@@ -106,6 +109,29 @@ filtered_input = input_files
                                             file("$p/${s}.R.midthickness.surf.gii")
                                         ]
                              }
+
+
+map_2_no_smooth = Channel.create()
+map_2_smooth = Channel.create()
+confounds_matched = confounds_matcher
+                            //Pull session information and description of task
+                            .map { n, s -> [
+                                            n,
+                                            s,
+                                            (n =~ /ses-.+?(?=_)/)[0],
+                                            file(n).getParent().getName().replace('preproc','confounds_regressors.tsv')
+                                           ]
+                                 }
+                            //Map to confounds
+                            .map { n, s, e, d ->    [
+                                                        n,
+                                                        file("$params.derivatives/fmriprep/$s/$e/func/${s}_${d}")
+                                                    ]
+                                 }
+                            .into { map_2_no_smooth; map_2_smooth }
+
+no_smooth_input = no_smooth_input.join(map_2_no_smooth)
+smooth_input = smooth_input.join(map_2_smooth)
 
 
 //Flag for whether to use smoothing or not
@@ -125,17 +151,21 @@ process clean_file_no_smoothing {
     publishDir "$params.out", mode: 'move'
 
     input:
-    file imagefile from no_smooth_input
+    set file(imagefile), file(confounds) from no_smooth_input
+    file "config.json" from params.config
 
     output:
     file "*_clean*" into unsmoothed_cleaned_img
+    file "config.json" into unsmoothed_config
 
     when: 
     !(smooth_enabled)
 
     shell:
     '''
-    ciftify_clean_img !{imagefile}    
+    ciftify_clean_img !{imagefile} \
+                     --clean-config config.json \
+                     --confounds-tsv !{confounds}
     '''
     
 }
@@ -147,17 +177,22 @@ process clean_file_smoothing {
     publishDir "$params.out", mode: 'move'
 
     input:
-    set file(imagefile), file(L), file(R) from smooth_input
+    set file(imagefile), file(L), file(R), file(confounds) from smooth_input
 
     output:
     file "*_clean*" into smoothed_cleaned_img
+    file "config.json" into smoothed_config
 
     when: 
     (smooth_enabled)
 
     shell:
     '''
-    ciftify_clean_img !{imagefile} --left-surface=!{L} --right-surface=!{R} 
+    ciftify_clean_img !{imagefile} \
+                    --left-surface=!{L} \
+                    --right-surface=!{R} \
+                    --clean-config config.json \
+                    --confounds-tsv !{confounds}
     '''
 
 }
