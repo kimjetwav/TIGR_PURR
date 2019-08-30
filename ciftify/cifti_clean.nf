@@ -74,11 +74,11 @@ if (print_help) {
 basepath = "$params.derivatives/ciftify/sub-*/MNINonLinear/Results/*/"
 if (params.type == "volume"){
 
-    input_files = Channel.fromPath("$basepath/*nii.gz")
+    input_files = Channel.fromPath("$basepath/*nii.gz").take(1)
 
 }else{
 
-    input_files = Channel.fromPath("$basepath/*dtseries.nii")
+    input_files = Channel.fromPath("$basepath/*dtseries.nii").take(1)
 
 }
 
@@ -150,9 +150,10 @@ process clean_file_no_smoothing {
     container "$params.simg"
     publishDir "$params.out", mode: 'move'
 
+
     input:
     set file(imagefile), file(confounds) from no_smooth_input
-    file "config.json" from params.config
+    file "config.json" from file(params.config)
 
     output:
     file "*_clean*" into unsmoothed_cleaned_img
@@ -178,6 +179,7 @@ process clean_file_smoothing {
 
     input:
     set file(imagefile), file(L), file(R), file(confounds) from smooth_input
+    file "config.json" from file(params.config)
 
     output:
     file "*_clean*" into smoothed_cleaned_img
