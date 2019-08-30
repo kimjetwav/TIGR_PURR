@@ -74,11 +74,11 @@ if (print_help) {
 basepath = "$params.derivatives/ciftify/sub-*/MNINonLinear/Results/*/"
 if (params.type == "volume"){
 
-    input_files = Channel.fromPath("$basepath/*nii.gz").take(1)
+    input_files = Channel.fromPath("$basepath/*nii.gz")
 
 }else{
 
-    input_files = Channel.fromPath("$basepath/*dtseries.nii").take(1)
+    input_files = Channel.fromPath("$basepath/*dtseries.nii")
 
 }
 
