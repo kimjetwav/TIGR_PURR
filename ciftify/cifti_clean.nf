@@ -153,9 +153,6 @@ process clean_file_no_smoothing {
     publishDir "$params.out", mode: 'move', \
                               saveAs: { "${sub}_$it" }, \
                               pattern: "*_clean*"
-    publishDir "$params.out", mode: 'copy', \
-                              saveAs: { "cifti_cleaning.json" }, \
-                              pattern: "config.json"
 
     input:
     set file(imagefile), val(sub), file(confounds) from no_smooth_input
@@ -184,9 +181,6 @@ process clean_file_smoothing {
     publishDir "$params.out", mode: 'move', \
                               saveAs: { "${sub}_$it" }, \
                               pattern: "*_clean*"
-    publishDir "$params.out", mode: 'copy', \
-                              saveAs: { "cifti_cleaning.json" }, \
-                              pattern: "config.json"
 
     input:
     set file(imagefile), file(L), file(R), val(sub), file(confounds) from smooth_input
