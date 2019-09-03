@@ -122,9 +122,10 @@ confounds_matched = confounds_matcher
                                             file(n).getParent().getName().replace('preproc','confounds_regressors.tsv')
                                            ]
                                  }
-                            //Map to confounds
+                            //Map to confounds, keep subject identity
                             .map { n, s, e, d ->    [
                                                         n,
+                                                        s,
                                                         file("$params.derivatives/fmriprep/$s/$e/func/${s}_${d}")
                                                     ]
                                  }
@@ -148,11 +149,12 @@ if (params.type == 'surface'){
 process clean_file_no_smoothing {
 
     container "$params.simg"
-    publishDir "$params.out", mode: 'move'
+    publishDir "$params.out", mode: 'move', \
+                              saveAs: { "${sub}_$it" }
 
 
     input:
-    set file(imagefile), file(confounds) from no_smooth_input
+    set file(imagefile), val(sub), file(confounds) from no_smooth_input
     file "config.json" from file(params.config)
 
     output:
@@ -175,10 +177,11 @@ process clean_file_no_smoothing {
 process clean_file_smoothing {
 
     container "$params.simg"
-    publishDir "$params.out", mode: 'move'
+    publishDir "$params.out", mode: 'move', \
+                              saveAs: { "${sub}_$it" }
 
     input:
-    set file(imagefile), file(L), file(R), file(confounds) from smooth_input
+    set file(imagefile), file(L), file(R), val(sub), file(confounds) from smooth_input
     file "config.json" from file(params.config)
 
     output:
