@@ -21,3 +21,4 @@ v1.0.1
 - [ENH] FeenICS strategy switched to ignore after failures to allow ICArus processing
 - [ENH] Fieldmap pipeline added for computing fieldmaps on CAMH GE scans (TIGRLAB internal)
 - [DOC] Updated TIGR-PURR documentation for non-BIDS internal pipelines
+- [FIX] FeenICS had bug associated with uncontrolled file naming, issue is resolved
