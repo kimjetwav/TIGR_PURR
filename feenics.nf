@@ -214,7 +214,7 @@ process run_feenics{
                 saveAs: { "$sub" }
     
     input:
-    set val(sub), file(sprlIN), file(sprlOUT) from oriented_subs
+    set val(sub), file("sprlIN.nii.gz"), file("sprlOUT.nii.gz") from oriented_subs
 
     output:
     file("exp/$sub") into melodic_out
@@ -239,8 +239,8 @@ process run_feenics{
 
     #Set up folder structure
     mkdir -p ./exp/!{sub}/{sprlIN,sprlOUT}
-    mv !{sprlIN} ./exp/!{sub}/sprlIN/
-    mv !{sprlOUT} ./exp/!{sub}/sprlOUT/
+    mv "sprlIN.nii.gz" ./exp/!{sub}/sprlIN/
+    mv "sprlOUT.nii.gz" ./exp/!{sub}/sprlOUT/
 
     #Run FeenICS pipeline
     (
