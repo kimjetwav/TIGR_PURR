@@ -1,0 +1,32 @@
+BIDS-apps Nextflow Pipeline
+============================
+
+
+Runs any BIDS application on a BIDS dataset.
+
+
+USAGE:
+	nextflow bids.nf -c <NF_CONF> [options] --bids <BIDS_DIR> --out <OUT_DIR>
+
+ARGUMENTS:
+	-c	 					Nextflow configuration file of BIDS application
+	--bids 						BIDS dataset directory (full path)
+	--out						BIDS derivatives directory to output into
+
+
+OPTIONAL ARGUMENTS: (default values pre-specified by config)
+
+	--simg <simg>				Which singularity container to use
+	--invocation <invocation_json>		Boutiques invocation JSON containing BIDS-app args
+	--descriptor <descriptor_json>		Boutiques descriptor JSON containing commandline
+						specification
+	--rewrite				Overwrite existing subjects
+	--subjects <subject_txt>		Subjects list
+
+SUPPORTED PROFILES
+
+	-profile (kimel|scc|local)		On which system to run the cifti_clean pipeline
+
+NOTES:
+By default all existing subjects WILL NOT be overwritten, instead they will be skipped.
+All logging information will be stored in <OUT_DIR>/pipeline_logs/${application_name}/<subject_name>.(err|out).
