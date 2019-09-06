@@ -6,24 +6,26 @@
 TIGRLab Pipelines: Utterly Reproducible Research (TIGR-PURR)
 ============================================================
 
-
 Welcome to the documentation page for TIGR-PURR.
-This is where you'll find information about how to run the lab's supported pipelines yourself as well as the various configuration options available to you. 
+This is where you'll find information about how to run the lab's supported pipelines yourself as well as the various configuration options available to you.
 
-TIGR-PURR is a pipeline system based off a combination of `Nextflow <https://www.nextflow.io>`_ and `Boutiques <https://www.boutiques.github.io>`_ which allow us to seamlessly run a variety of `BIDS Applications <https://bids.neuroimaging.io>`_ based distributed pipelines easily with only a little bit of configuration work. The system will allow you to run full BIDS-app pipelines on:
+TIGR-PURR is a pipeline system based off of `Nextflow <https://www.nextflow.io>`_. TIGR-PURR allows you to run various pipelines in a distributed fashion removing most of work dealing with cluster-specific scripting. Currently TIGR-PURR can be run on:
 
 * The local Kimel-Lab Cluster
 * CAMH's SCC Cluster
-* Scinet's Niagara Cluster
 * Your local computer
 
-To learn about how you can run BIDS pipelines on any BIDS dataset go to :ref:`getting_started`
+.. note::
+        Scinet's Niagara will be supported in an upcoming release!
 
-To go through a quick example that you can run yourself, check out the quickstart tutorials.
+A central feature of TIGR-PURR is its ability to run *any BIDS-application* through implementation of `Boutiques <https://www.boutiques.github.io>`_ under the hood. To learn about how you can run BIDS pipelines on any BIDS dataset check out :ref:`getting_started`. To go through an example running a BIDS application try the :ref:`quickstart_tutorial`
+
+
+Finally, due to the needs for easily distributed post- and pre-processing of data that aren't applicable in the context of BIDS. TIGR-PURR is expanding outside of BIDS! Check out :ref:`not_bids` for information about non-BIDS-application pipelines (such as parallelized cifti_clean on ciftify outputs)
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents 
+   :caption: Contents
 
    getting_started
    quickstart_tutorial

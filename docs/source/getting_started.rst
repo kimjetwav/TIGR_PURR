@@ -1,10 +1,10 @@
 .. _getting_started:
 
---------------------
-Getting started
---------------------
+-----------------------------------------
+Getting started with TIGR-PURR BIDS-apps
+-----------------------------------------
 
-In this section, we'll begin with where you can find regularly running standard BIDS pipelines. Then we will discuss how you can run your own standard pipeline (for example if you wanted outputs for a specific dataset quickly, although careful with space usage!). Finally we'll go over how you can customize arguments for either the BIDS application you want to run or SLURM if your requirements are more complex. 
+In this section, we'll begin with where you can find regularly running standard BIDS pipelines. Then we will discuss how you can run your own standard pipeline (for example if you wanted outputs for a specific dataset quickly, although careful with space usage!). Finally we'll go over how you can customize arguments for either the BIDS application you want to run or SLURM if your requirements are more complex.
 
 
 Default Pipelines
@@ -15,7 +15,7 @@ The **Default Pipelines** are defined as being any BIDS pipelines that are run w
         /archive/data/<PROJECT>/pipelines/bids_apps/
 
 These outputs will be automatically produced at regular intervals (depending on the pipeline). Outputs that are automatically run will be pushed into this directory. The particular participants that are run at any given time are those that are found in the **BIDS directory** in our archive which is found in::
-        
+
         /archive/data/<PROJECT>/data/bids/
 
 These will be automatically updated on a nightly basis for all of our studies.
@@ -40,7 +40,7 @@ Running your own default pipeline is simple with our set-up. First open up a ter
 
                 module load /KIMEL/quarantine/modules/quarantine
 
-        Then proceed with loading in nextflow as stated above. 
+        Then proceed with loading in nextflow as stated above.
 
 This loads in `Nextflow <https://nextflow.io>`_ and `Boutiques <https://boutiques.github.io>`_ which is required by TIGR-PURR. Once this module is loaded in you're ready to go! To run a pipeline some details are needed:
 
@@ -67,18 +67,25 @@ Here you will find a bunch of files that look like the following::
 
 Every **Nextflow Configuration** file ends with a ``*.nf.config`` and always begins with ``<bidsapp>-<version>``. This way you know exactly which version of a pipeline you're running!
 
+.. note::
+        Since TIGR-PURR is expanding past just BIDS applications there are additional configuration files available
+        a more robust organizational system is coming up in the near future.
+
 Let's say we want to run the ``mriqc-0.14.2`` pipeline. Then running the pipeline is done with the following command::
 
         nextflow /archive/code/tigrlab_nextflow/bids.nf \
         -c /archive/code/tigrlab_nextflow/nextflow_config/mriqc-0.14.2.nf.config \
-        --bids <bids_dir> --out <output_dir> 
+        --bids <bids_dir> --out <output_dir>
+
+.. note::
+        The script /archive/code/tigrlab_nextflow/bids.nf is the central BIDS script for running *any BIDS application through TIGR-PURR*
 
 
 This will automatically submit SLURM jobs to the local Kimel cluster and run the **Default** MRIQC pipeline on the specified BIDS dataset. Note that this will run *all* BIDS subjects within the folder.
 
 .. note::
         If you want to run nextflow in the background, add the argument::
-                
+
                 -bg
 
 
@@ -88,9 +95,9 @@ Cleaning the Nextflow Work folder
 ==================================
 
 When you run::
-        
+
         module load nextflow/19.04.1
-       
+
 A folder is automatically created in ::
 
         /scratch/<YOUR_NAME>/nextflow_work/
@@ -98,8 +105,8 @@ A folder is automatically created in ::
 This is a work directory used by nextflow to store intermediate outputs to pipelines. For most of our pipelines running BIDS-applications, not much will be stored here since all bids-apps are configured to use either /tmp/ (on kKimel) or /export/ramdisk (on SCC). However it is important that you clean out this folder periodically as it will continue building up as you use TIGR-PURR. To help you out with this we've built-in a function with the module::
 
         clean_nxf
-        
-Which will wipe the contents of your nextflow working directory. 
+
+Which will wipe the contents of your nextflow working directory.
 
 .. warning::
 
@@ -131,7 +138,7 @@ This means that you can specify any JSON file using the flag ``--invocation`` wi
 
 .. note::
         When using your own **invocation JSON** you will need to create your own file and place it in your own directory.
-       
+
      A good practice regarding using your own **invocation JSON** is to store it alongside the code that will use the outputs of the pipeline with a file-name that contains the pipeline name and version. That way when you version-control your code (which you should be using) *the invocation JSON will also be stored!*
 
 Invocation JSONS are essentially command-line arguments packed neatly into a JSON file. This explicitly stores the arguments you used for a pipeline so that you can remember what exactly you ran if you need to reproduce outputs of a pipeline or want to incorporate more subjects when running a pipeline. TIGR-PURR uses `Boutiques <https://www.boutiques.github.io>`_ under the hood which handles these JSON files and translates them to command-line calls.
@@ -195,7 +202,7 @@ This will print the full description of the inputs to the BIDS application::
                                 Optional: True
                                 List Length: N/A
                                 Description: filter input dataset by session id
-                              
+
           ...
 
           required arguments:
@@ -247,9 +254,9 @@ This will run the pipeline using your own custom command-line arguments!
 Pipeline Dry-Runs
 ==================
 
-A **Dry-run** is a way of running pipelines without performing any actual computation. That way you can run a TIGR-PURR pipeline and get quick feedback on whether a pipeline will crash or not due to reasons related to you submitting the job improperly. It is usually a good idea to perform a dry-run of a pipeline prior to doing an actual run. 
+A **Dry-run** is a way of running pipelines without performing any actual computation. That way you can run a TIGR-PURR pipeline and get quick feedback on whether a pipeline will crash or not due to reasons related to you submitting the job improperly. It is usually a good idea to perform a dry-run of a pipeline prior to doing an actual run.
 
-Most, if not all, BIDS-applications have an argument allowing you to run the pipeline dry. As such, we can run a pipeline dry by using an invocation JSON with a dry-run argument specified. 
+Most, if not all, BIDS-applications have an argument allowing you to run the pipeline dry. As such, we can run a pipeline dry by using an invocation JSON with a dry-run argument specified.
 
 Our invocation repo will host a dry-run version of each pipeline (if available) for you to quickly test things out. The naming will look like::
 
@@ -276,7 +283,7 @@ You can run only these subjects by adding the ``--subjects`` flag to the nextflo
 
 
 .. _note:
-        
+
         If your subject list contains invalid subjects, subjects for which no BIDS directory exists, a list of invalid subjects will be outputted into ``<output_dir>/pipelines_logs/invalid_subjects.log``
 
 That's it! Now you might be wondering **what exactly did I run with MRIQC?**
@@ -292,11 +299,11 @@ Nextflow has the ability to add pipeline HTML reports which gives you informatio
 
         -with-report <REPORT_FILE_PATH>
 
-The  ``<REPORT_FILE_PATH>`` is the full path including the report file-name in an already existing directory. 
+The  ``<REPORT_FILE_PATH>`` is the full path including the report file-name in an already existing directory.
 
 
 .. note::
-        
+
         Good practices for saving reports are to save it into the same folder as your pipeline output. In addition the name of the report should ideally be descriptive of the pipeline you are running (pipeline, version, timestamp, etc..)
 
 For more information on Nextflow reports check out the `Nextflow Reference Documentation <https://www.nextflow.io/docs/latest/tracing.html>`_
@@ -311,7 +318,7 @@ When running pipelines often it is desirable to have logs available for each sub
         <subject>.out
         <subject>.err
 
-These are the **standard output** and **standard error** of the processes run respectively and store what would have been outputted to your terminal had you directly run the pipeline without TIGR-PURR (albeit wrapped using Boutiques). 
+These are the **standard output** and **standard error** of the processes run respectively and store what would have been outputted to your terminal had you directly run the pipeline without TIGR-PURR (albeit wrapped using Boutiques).
 
 If you are familiar with using `SLURM's <https://slurm.schedmd.com/>`_ sbatch command, then this will be exactly the outputs that SLURM produces.
 
@@ -330,7 +337,7 @@ The default system that TIGR-PURR will run on is on the local Kimel cluster. In 
 
 For example::
 
-        
+
         nextflow run /KIMEL/tigrlab/archive/code/tigrlab_nextflow/bids.nf \
         -c /KIMEL/tigrlab/archive/code/tigrlab_nextflow/nextflow_conf/mriqc-0.14.2.nf.config \
         --bids <BIDS> --out <OUT> \
@@ -339,8 +346,8 @@ For example::
 Will run pipelines on the SCC.
 
 .. note::
-        In order to run pipelines on the SCC *you must be on the SCC dev node!*. 
-        
+        In order to run pipelines on the SCC *you must be on the SCC dev node!*.
+
         Also note that /KIMEL/tigrlab/ is added to the paths to our filesystem, this is necessary!
 
 .. note::
@@ -366,9 +373,9 @@ This configuration file contains all the information needed to submit a job. If 
                }
         }
 
-The tidbit with ``clusterOptions`` is equivalent to the command-line arguments used in SLURM's ``sbatch`` command. Therefore you can simply copy and paste this configuration file, and update ``clusterOptions`` as you please. 
+The tidbit with ``clusterOptions`` is equivalent to the command-line arguments used in SLURM's ``sbatch`` command. Therefore you can simply copy and paste this configuration file, and update ``clusterOptions`` as you please.
 
 .. note::
         We're currently working on a method to allow you to override this without having to make a new
-        Nextflow configuration file. Using either command-line arguments or a text file containing 
+        Nextflow configuration file. Using either command-line arguments or a text file containing
         SLURM directives. The documentation will be updated when this feature is released
