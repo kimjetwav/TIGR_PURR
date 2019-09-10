@@ -20,5 +20,6 @@ v1.0.1
 - [FIX] FeenICS will combine spiral scans after artifact removal
 - [ENH] FeenICS strategy switched to ignore after failures to allow ICArus processing
 - [ENH] Fieldmap pipeline added for computing fieldmaps on CAMH GE scans (TIGRLAB internal)
+- [ENH] Fieldmap pipeline outputs JSON sidecar into output folder containing units (CAMH GE specific!)
 - [DOC] Updated TIGR-PURR documentation for non-BIDS internal pipelines
 - [FIX] FeenICS had bug associated with uncontrolled file naming, issue is resolved
