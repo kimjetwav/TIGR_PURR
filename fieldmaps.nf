@@ -122,6 +122,64 @@ fieldmap_input = input_subs
                                         new File("$nifti_dir/$x/$y").toPath().toRealPath(),
                                         new File("$nifti_dir/$x/$z").toPath().toRealPath()
                                     ] }
+// Resample if needed
+process resample {
+
+    module "FSL/5.0.11"
+
+    input:
+    set val(sub), file(echo1), file(echo2) from fieldmap_input
+
+    output:
+    set val(sub), file(echo1), file(echo2) into resampled_fieldmaps
+
+    shell:
+    '''
+    #!/bin/bash 
+
+    THRES=0.0001
+
+    # Grab info from image 1
+    img1_x=$(fslinfo !{echo1} | grep pixdim1 | awk '{print $2}')
+    img1_y=$(fslinfo !{echo1} | grep pixdim2 | awk '{print $2}')
+    img1_z=$(fslinfo !{echo1} | grep pixdim3 | awk '{print $2}')
+    img1_voxarea=$(echo "$img1_x*$img1_y*$img1_z" | bc -l)
+
+    # Grab info from image 1
+    img2_x=$(fslinfo !{echo2} | grep pixdim1 | awk '{print $2}')
+    img2_y=$(fslinfo !{echo2} | grep pixdim2 | awk '{print $2}')
+    img2_z=$(fslinfo !{echo2} | grep pixdim3 | awk '{print $2}')
+    img2_voxarea=$(echo "$img2_x*$img2_y*$img2_z" | bc -l)
+
+    #Calculate difference
+    diff=$(echo "$img1_voxarea - $img2_voxarea" | bc -l)
+
+    #Check image areas then downsample if needed
+    if (( $(echo "$diff > $THRES" | bc -l) )); then
+        in=!{echo2}
+        ref=!{echo1}
+    elif (( $(echo "$diff < -1*$THRES" | bc -l) )); then
+        in=!{echo1}
+        ref=!{echo2}
+    else
+        exit 0
+    fi
+
+    #Split images then generate transforms
+    fslsplit $in image1_ -t
+    fslsplit $ref image2_ -t
+
+    #Resample image
+    flirt -in image1_0000.nii.gz -ref image2_0000.nii.gz -omat resamp_mat
+
+    #Apply transformation
+    flirt -in $in -ref image2_0000.nii.gz -applyxfm -init resamp_mat -out transformed.nii.gz
+
+    #Replace
+    mv transformed.nii.gz $in
+    '''
+
+}
 
 // With list of inputs (sub,echo1,echo2) apply fieldmap processing!
 process fieldmaps {
@@ -139,7 +197,7 @@ process fieldmaps {
                 saveAs: { echo1.getName().replace("$params.echo1","FIELDMAP") }
 
     input:
-    set val(sub), file(echo1), file(echo2) from fieldmap_input
+    set val(sub), file(echo1), file(echo2) from resampled_fieldmaps
 
     output:
     set val(sub), file("fieldmap.nii.gz"), file("magnitude.nii.gz") into fieldmap_output
