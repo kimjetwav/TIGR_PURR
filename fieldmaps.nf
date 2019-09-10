@@ -122,6 +122,8 @@ fieldmap_input = input_subs
                                         new File("$nifti_dir/$x/$y").toPath().toRealPath(),
                                         new File("$nifti_dir/$x/$z").toPath().toRealPath()
                                     ] }
+
+
 // Resample if needed
 process resample {
 
@@ -196,11 +198,16 @@ process fieldmaps {
                 pattern:  "fieldmap.nii.gz" , \
                 saveAs: { echo1.getName().replace("$params.echo1","FIELDMAP") }
 
+    publishDir "$params.out/${params.application}/$sub", \
+                mode: 'copy', \
+                pattern: "json", \
+                saveAs: { echo1.getName().replace("$params.echo1","FIELDMAP").replace('.nii.gz','json') }
+
     input:
     set val(sub), file(echo1), file(echo2) from resampled_fieldmaps
 
     output:
-    set val(sub), file("fieldmap.nii.gz"), file("magnitude.nii.gz") into fieldmap_output
+    set val(sub), file("fieldmap.nii.gz"), file("magnitude.nii.gz"), file("json") into fieldmap_output
 
 
     shell:
@@ -264,6 +271,8 @@ process fieldmaps {
     fslcpgeom ${FM65} magnitude.nii.gz -d
     ) 2>> ${log_err} 1>> ${log_out}
 
+    ####make a JSON file containing the units
+    echo ' { "Units": "rad/s" } ' > json
+
     '''
 }
-
