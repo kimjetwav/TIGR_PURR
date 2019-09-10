@@ -86,7 +86,6 @@ bids_channel = Channel
                     .filter { it.contains('sub-') }
 
 //Filter all subjects first
-
 // Process subject list
 if (params.subjects){
 
@@ -143,7 +142,6 @@ if (params.subjects){
         """
 
     }
-
 
     //Write into main subject channel
     sub_channel = valid_subs
