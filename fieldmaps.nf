@@ -201,7 +201,7 @@ process fieldmaps {
     publishDir "$params.out/${params.application}/$sub", \
                 mode: 'copy', \
                 pattern: "json", \
-                saveAs: { echo1.getName().replace("$params.echo1","FIELDMAP").replace('.nii.gz','json') }
+                saveAs: { echo1.getName().replace("$params.echo1","FIELDMAP").replace('.nii.gz','.json') }
 
     input:
     set val(sub), file(echo1), file(echo2) from resampled_fieldmaps
