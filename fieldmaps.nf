@@ -25,7 +25,7 @@ input_sessions_dir = new File(nifti_dir)
 input_sessions = input_sessions_dir.list()
 
 //Outputs
-output_sessions_dir = new File(params.out)
+output_sessions_dir = new File("$params.out/fieldmaps")
 output_sessions = output_sessions_dir.list()
 
 //Get subjects
