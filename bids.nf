@@ -167,9 +167,15 @@ process save_invocation{
     invoke_name=$(basename !{params.invocation})
 
     #If files are identical, no point of copying
-    DIFF=$(diff !{params.invocation} !{params.out}/$invoke_name)
+    if [ -f !{params.out}/$invoke_name ]; then
+        
+        DIFF=$(diff !{params.invocation} !{params.out}/$invoke_name)
 
-    if [ "$DIFF" != "" ]; then
+        if [ "$DIFF" != "" ]; then
+            cp -n !{params.invocation} !{params.out}
+        fi
+
+    else
         cp -n !{params.invocation} !{params.out}
     fi
     '''
