@@ -156,7 +156,7 @@ if (params.preartifact) {
         set val(sub), file("sprl.nii") from preartifact_sprls
 
         output:
-        set val(sub), file("$sub") into pseudo_out
+        set val(sub), file("$sub") into preartifact_pseudo_out
 
         shell:
         '''
