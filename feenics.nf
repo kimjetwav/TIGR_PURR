@@ -31,6 +31,14 @@ if (!params.rewrite) {
 
 }
 
+//If using pre-artifacted spirals
+if (params.preartifact) {
+
+    log.info("--preartifact flag is on! Will rename files but not performing cleaning!")
+
+}
+   
+
 
 // Main processes
 //nifti directory
@@ -119,8 +127,56 @@ if (params.subjects){
     input_subs = Channel.from(to_run)
 }
 
+if (params.preartifact) {
 
-sub_channel = input_subs
+
+    //Split into artifact and pre-artifact
+    preartifact = new File(params.preartifact).readLines()
+    feenics_channel = Channel.create()
+    preartifact_channel = Channel.create()
+    input_subs.choice(preartifact_channel,feenics_channel){preartifact.contains(it) ? 0 : 1}
+
+    //Now point preartifact to SPRL-COMB
+    preartifact_sprls = preartifact_channel
+                                .map{ n ->  [
+                                                n,
+                                                new File("$nifti_dir/$n/").list().first()
+                                            ]
+                                    }
+
+    //Process non-artifacted SPRLS
+    process transfer_preartifact {
+
+        stageInMode "copy"
+        publishDir "$params.out/${params.application}", \
+                    mode: 'move',
+                    saveAs: { "$sub" }
+
+        input:
+        set val(sub), file("sprl.nii") from preartifact_sprls
+
+        output:
+        set val(sub), file("$sub") into pseudo_out
+
+        shell:
+        '''
+        #!/bin/bash
+
+        #GZIP the nii file 
+        gzip sprl.nii
+
+        #Set up output directory
+        mkdir !{sub}
+        mv sprl.nii.gz !{sub}/!{sub}.sprlCOMBINED.denoised.nii.gz
+
+        '''
+    }
+
+}
+
+
+
+sub_channel = feenics_channel
                     .map { n -> [
                                     n,
                                     new File("$nifti_dir/$n").list()
@@ -138,7 +194,7 @@ sub_channel = input_subs
                                 ]
                          }
 
-
+/// ARTIFACT STREAM
 //GZIP files
 process gzip_nii {
 
@@ -198,6 +254,9 @@ process reorient_bad {
 
 
 }
+
+
+//These ones we can just throw in there!
 
 //Run subject level FeenICS
 process run_feenics{
