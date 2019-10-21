@@ -135,13 +135,23 @@ if (params.preartifact) {
     feenics_channel = Channel.create()
     preartifact_channel = Channel.create()
     input_subs.choice(preartifact_channel,feenics_channel){preartifact.contains(it) ? 0 : 1}
+    input_subs = feenics_channel
 
     //Now point preartifact to SPRL-COMB
     preartifact_sprls = preartifact_channel
                                 .map{ n ->  [
                                                 n,
-                                                new File("$nifti_dir/$n/").list().first()
+                                                new File("$nifti_dir/$n/")
+                                                                .list()
+                                                                .findAll { it.contains("SPRL-COMB") } 
+                                                                    
                                             ]
+                                    }
+                                .filter { !(it[1].isEmpty()) }
+                                .map{ n,f ->    [
+                                                    n,
+                                                    new File("$nifti_dir/$n/${f[0]}").toPath().toRealPath()
+                                                ] 
                                     }
 
     //Process non-artifacted SPRLS
@@ -176,7 +186,7 @@ if (params.preartifact) {
 
 
 
-sub_channel = feenics_channel
+sub_channel = input_subs
                     .map { n -> [
                                     n,
                                     new File("$nifti_dir/$n").list()
