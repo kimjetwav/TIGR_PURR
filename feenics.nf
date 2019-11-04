@@ -154,10 +154,11 @@ if (params.preartifact) {
                                                 ] 
                                     }
 
-    //Process non-artifacted SPRLS
+    //Process non-artifacted SPRLS need to corrct PRS
     process transfer_preartifact {
 
         stageInMode "copy"
+        module 'freesurfer'
         publishDir "$params.out/${params.application}", \
                     mode: 'move',
                     saveAs: { "$sub" }
@@ -174,6 +175,24 @@ if (params.preartifact) {
 
         #GZIP the nii file 
         gzip sprl.nii
+
+        #Fix orientation issue if exists
+        orientation=$(mri_info --orientation sprl.nii.gz)
+
+        if [ "$orientation" = "PRS" ]; then
+
+            fslorient -deleteorient sprl.nii.gz
+
+            fslswapdim sprl.nii.gz -x -y z  sprl.nii.gz
+
+            fslorient -setqformcode 1 sprl.nii.gz
+
+            #Save list of reoriented scans
+            mkdir -p !{params.out}/feenics/
+            reorient_list=!{params.out}/feenics/reoriented.log
+            echo !{sub} >> $reorient_list
+
+        fi
 
         #Set up output directory
         mkdir !{sub}
