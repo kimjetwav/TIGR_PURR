@@ -119,14 +119,15 @@ fieldmap_input = input_subs
                     .transpose()
                     .map { x,y,z -> [
                                         x,
-                                        new File("$nifti_dir/$x/$y").toPath().toRealPath(),
-                                        new File("$nifti_dir/$x/$z").toPath().toRealPath()
+                                        new File("$nifti_dir/$x/$y").toPath(),
+                                        new File("$nifti_dir/$x/$z").toPath()
                                     ] }
 
 
 // Resample if needed
 process resample {
 
+    stageInMode 'copy'
     module "FSL/5.0.11"
 
     input:
