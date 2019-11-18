@@ -71,7 +71,7 @@ input_dirs = new File(params.bids).list()
 output_dirs = new File(params.out).list()
 
 // Filter if rewrite
-if (params.rewrite){
+if (!params.rewrite){
 
     to_run = input_dirs.findAll { !(output_dirs.contains(it)) }
 
