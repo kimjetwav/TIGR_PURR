@@ -165,18 +165,20 @@ process save_invocation{
     '''
 
     invoke_name=$(basename !{params.invocation})
+    datestr=$(date +"%d-%m-%Y")
 
-    #If files are identical, no point of copying
-    if [ -f !{params.out}/$invoke_name ]; then
+    # If file with same date is available, check if they are the same
+    if [ -f !{params.out}/${invoke_name}_${datestr} ]; then
         
-        DIFF=$(diff !{params.invocation} !{params.out}/$invoke_name)
+        DIFF=$(diff !{params.invocation} !{params.out}/${invoke_name}_${datestr})
 
         if [ "$DIFF" != "" ]; then
-            cp -n !{params.invocation} !{params.out}
+            >&2 echo "Error invocations have identical names but are not identical!"
+            exit 1
         fi
 
     else
-        cp -n !{params.invocation} !{params.out}
+        cp -n !{params.invocation} !{params.out}/${invoke_name}_${datestr}
     fi
     '''
 
