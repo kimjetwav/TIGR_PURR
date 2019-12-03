@@ -165,12 +165,13 @@ process save_invocation{
     '''
 
     invoke_name=$(basename !{params.invocation})
+    invoke_name=${invoke_name%.json}
     datestr=$(date +"%d-%m-%Y")
 
     # If file with same date is available, check if they are the same
-    if [ -f !{params.out}/${invoke_name}_${datestr} ]; then
+    if [ -f !{params.out}/${invoke_name}_${datestr}.json ]; then
         
-        DIFF=$(diff !{params.invocation} !{params.out}/${invoke_name}_${datestr})
+        DIFF=$(diff !{params.invocation} !{params.out}/${invoke_name}_${datestr}.json)
 
         if [ "$DIFF" != "" ]; then
             >&2 echo "Error invocations have identical names but are not identical!"
@@ -178,7 +179,7 @@ process save_invocation{
         fi
 
     else
-        cp -n !{params.invocation} !{params.out}/${invoke_name}_${datestr}
+        cp -n !{params.invocation} !{params.out}/${invoke_name}_${datestr}.json
     fi
     '''
 
@@ -233,7 +234,6 @@ process run_bids{
     scratch true
 
     module 'slurm'
-
     shell:
     '''
 
@@ -275,5 +275,3 @@ process run_bids{
 
     '''
 }
-
-
