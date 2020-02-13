@@ -1,7 +1,3 @@
-// INPUT SPECIFICATION
-// Feed in study from DATMAN and process all sessions
-
-//TO-DO: Set up logging of subject information
 
 if (!params.study || !params.out){
 

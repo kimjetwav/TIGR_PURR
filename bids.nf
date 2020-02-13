@@ -1,7 +1,5 @@
-// INPUT SPECIFICATION
-// Don't use study, allow input to be specified freely
-
 if (!params.simg){
+
     log.info('Singularity container not specified!')
     log.info('Need --simg argument in Nextflow Call!')
     System.exit(1)
@@ -19,14 +17,12 @@ if (!params.bids || !params.out) {
 log.info("BIDS Directory: $params.bids")
 log.info("Output directory: $params.out")
 
-//If params.application not specified, then use default bids_app
 if (!params.application) {
 
     params.application="kimel_bidsapp"
 
 }
 
-// CHECK INVOCATION
 if (!params.invocation || !params.descriptor) {
 
     log.info('Missing BOSH invocation and descriptor JSONs!')
@@ -40,16 +36,16 @@ if (!params.invocation || !params.descriptor) {
 
 }
 
-//Overwrite
 if (!params.rewrite) {
+
     log.info("--rewrite flag not used, will skip existing outputs")
+
 }else{
+
     log.info("--rewrite flag is on! Will re-run on existing outputs!")
     log.info("If you want to completely re-run, please delete subject output")
 
 }
-
-// Final Subjects check
 
 if (params.subjects) {
 
@@ -57,8 +53,6 @@ if (params.subjects) {
 
 }
 
-
-//////////////////////////////////////////////////////////////
 
 // Main Processes
 
@@ -84,8 +78,6 @@ if (!params.rewrite){
 bids_channel = Channel
                     .from(to_run)
                     .filter { it.contains('sub-') }
-
-//Filter all subjects first
 
 // Process subject list
 if (params.subjects){
@@ -144,8 +136,6 @@ if (params.subjects){
 
     }
 
-
-    //Write into main subject channel
     sub_channel = valid_subs
                         .splitText() { it.strip() }
 }else{
@@ -170,7 +160,7 @@ process save_invocation{
 
     # If file with same date is available, check if they are the same
     if [ -f !{params.out}/${invoke_name}_${datestr}.json ]; then
-        
+
         DIFF=$(diff !{params.invocation} !{params.out}/${invoke_name}_${datestr}.json)
 
         if [ "$DIFF" != "" ]; then
@@ -182,14 +172,9 @@ process save_invocation{
         cp -n !{params.invocation} !{params.out}/${invoke_name}_${datestr}.json
     fi
     '''
-
 }
 
 process modify_invocation{
-
-    // Takes a BIDS subject identifier
-    // Modifies the template invocation json and outputs
-    // subject specific invocation
 
     input:
     val sub from sub_channel
@@ -217,8 +202,6 @@ process modify_invocation{
         json.dump(j_dict,f,indent=4)
 
     """
-
-
 }
 
 process run_bids{
