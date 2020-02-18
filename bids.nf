@@ -156,7 +156,7 @@ process save_invocation{
 
     invoke_name=$(basename !{params.invocation})
     invoke_name=${invoke_name%.json}
-    datestr=$(date +"%d-%m-%Y")
+    datestr=$(date -I)
 
     # If file with same date is available, check if they are the same
     if [ -f !{params.out}/${invoke_name}_${datestr}.json ]; then

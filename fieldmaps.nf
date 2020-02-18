@@ -1,4 +1,3 @@
-
 if (!params.study || !params.out){
 
     println("Insufficient specification")
@@ -73,7 +72,7 @@ if (params.subjects){
                 x = x.strip('[').strip(']')
                 x = [x.strip(' ').strip("\\n") for x in x.split(',')]
                 return x
-            
+
             #Process full BIDS subjects
             bids_subs = nflist_2_pylist("$available_subs")
             input_subs = nflist_2_pylist("$subs")
@@ -88,7 +87,7 @@ if (params.subjects){
             if invalid_subs:
 
                 with open('invalid','w') as f:
-                    f.writelines("\\n".join(invalid_subs)) 
+                    f.writelines("\\n".join(invalid_subs))
                     f.write("\\n")
 
             """
@@ -138,7 +137,7 @@ process resample {
 
     shell:
     '''
-    #!/bin/bash 
+    #!/bin/bash
 
     THRES=0.0001
 
