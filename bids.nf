@@ -1,8 +1,20 @@
+
+usage = file("${baseDir.getParent()}/usage/bids_usage"
+bindings = [ "rewrite":"$params.rewrite",
+             "subjects":"$params.subjects",
+             "simg":"$params.simg",
+             "descriptor":"$params.descriptor",
+             "invocation":"$params.invocation",
+             "license":"$params.license"]
+engine = new groovy.text.SimpleTemplateEngine()
+toprint = engine.createTemplate(usage.text).make(bindings)
+printhelp = params.help
+
 if (!params.simg){
 
     log.info('Singularity container not specified!')
     log.info('Need --simg argument in Nextflow Call!')
-    System.exit(1)
+    printhelp = true
 
 }
 
@@ -10,12 +22,9 @@ if (!params.bids || !params.out) {
 
     log.info('Insufficient specification!')
     log.info('Need  --bids, --out!')
-    System.exit(1)
+    printhelp = true
 
 }
-
-log.info("BIDS Directory: $params.bids")
-log.info("Output directory: $params.out")
 
 if (!params.application) {
 
@@ -27,12 +36,7 @@ if (!params.invocation || !params.descriptor) {
 
     log.info('Missing BOSH invocation and descriptor JSONs!')
     log.info('Exiting with Error')
-    System.exit(1)
-
-}else {
-
-    log.info("Using Descriptor File: $params.descriptor")
-    log.info("Using Invocation File: $params.invocation")
+    printhelp = true
 
 }
 
@@ -53,6 +57,15 @@ if (params.subjects) {
 
 }
 
+if (printhelp){
+    print(toprint)
+    System.exit(0)
+}
+
+log.info("BIDS Directory: $params.bids")
+log.info("Output directory: $params.out")
+log.info("Using Descriptor File: $params.descriptor")
+log.info("Using Invocation File: $params.invocation")
 
 // Main Processes
 

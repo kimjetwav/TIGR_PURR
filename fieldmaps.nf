@@ -1,14 +1,20 @@
 
+usage = file("${baseDir.getParent()}/usage/fieldmaps_usage"
+bindings = [ "rewrite":"$params.rewrite",
+             "echo1":"$params.echo1",
+             "echo2":"$params.echo2"]
+engine = new groovy.text.SimpleTemplateEngine()
+toprint = engine.createTemplate(usage.text).make(bindings)
+printhelp = params.help
+
 if (!params.study || !params.out){
 
     println("Insufficient specification")
     println("Both --study and --out are required!")
-    System.exit(1)
-
+    printhelp = true
 
 }
 
-println("Output directory: $params.out")
 
 if (params.subjects) {
 
@@ -16,8 +22,14 @@ if (params.subjects) {
 
 }
 
+if (printhelp){
+    print(toprint)
+    System.exit(0)
+}
+
 // Main processes
 //nifti directory
+println("Output directory: $params.out")
 nifti_dir="/archive/data/$params.study/$params.nii"
 
 //Inputs
@@ -73,7 +85,7 @@ if (params.subjects){
                 x = x.strip('[').strip(']')
                 x = [x.strip(' ').strip("\\n") for x in x.split(',')]
                 return x
-            
+
             #Process full BIDS subjects
             bids_subs = nflist_2_pylist("$available_subs")
             input_subs = nflist_2_pylist("$subs")
@@ -88,7 +100,7 @@ if (params.subjects){
             if invalid_subs:
 
                 with open('invalid','w') as f:
-                    f.writelines("\\n".join(invalid_subs)) 
+                    f.writelines("\\n".join(invalid_subs))
                     f.write("\\n")
 
             """
@@ -138,7 +150,7 @@ process resample {
 
     shell:
     '''
-    #!/bin/bash 
+    #!/bin/bash
 
     THRES=0.0001
 

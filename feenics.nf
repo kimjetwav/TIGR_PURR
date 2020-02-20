@@ -1,14 +1,19 @@
 
+usage = file("${baseDir.getParent()}/usage/feenics_usage"
+bindings = [ "rewrite":"$params.rewrite",
+             "preartifact":"$params.preartifact",
+             "simg":"$params.simg"]
+engine = new groovy.text.SimpleTemplateEngine()
+toprint = engine.createTemplate(usage.text).make(bindings)
+printhelp = params.help
+
 if (!params.study || !params.out){
 
     log.info("Insufficient specification")
     log.info("Both --study and --out are required!")
-    System.exit(1)
-
+    printhelp = true
 
 }
-
-log.info("Output directory: $params.out")
 
 if (params.subjects) {
 
@@ -16,12 +21,13 @@ if (params.subjects) {
 
 }
 
-
-
 //Overwrite
 if (!params.rewrite) {
+
     log.info("--rewrite flag not used, will skip existing outputs")
+
 }else{
+
     log.info("--rewrite flag is on! Will re-run on existing outputs!")
     log.info("If you want to completely re-run, please delete subject output")
 
@@ -33,8 +39,15 @@ if (params.preartifact) {
     log.info("--preartifact flag is on! Will rename files but not performing cleaning!")
 
 }
-   
 
+if (printhelp){
+
+    print(toprint)
+    System.exit(0)
+
+}
+
+log.info("Output directory: $params.out")
 
 // Main processes
 //nifti directory
@@ -93,7 +106,7 @@ if (params.subjects){
                 x = x.strip('[').strip(']')
                 x = [x.strip(' ').strip("\\n") for x in x.split(',')]
                 return x
-            
+
             #Process full BIDS subjects
             bids_subs = nflist_2_pylist("$available_subs")
             input_subs = nflist_2_pylist("$subs")
@@ -108,7 +121,7 @@ if (params.subjects){
             if invalid_subs:
 
                 with open('invalid','w') as f:
-                    f.writelines("\\n".join(invalid_subs)) 
+                    f.writelines("\\n".join(invalid_subs))
                     f.write("\\n")
 
             """
@@ -139,15 +152,15 @@ if (params.preartifact) {
                                                 n,
                                                 new File("$nifti_dir/$n/")
                                                                 .list()
-                                                                .findAll { it.contains("SPRL-COMB") } 
-                                                                    
+                                                                .findAll { it.contains("SPRL-COMB") }
+
                                             ]
                                     }
                                 .filter { !(it[1].isEmpty()) }
                                 .map{ n,f ->    [
                                                     n,
                                                     new File("$nifti_dir/$n/${f[0]}").toPath().toRealPath()
-                                                ] 
+                                                ]
                                     }
 
     //Process non-artifacted SPRLS need to corrct PRS
@@ -169,7 +182,7 @@ if (params.preartifact) {
         '''
         #!/bin/bash
 
-        #GZIP the nii file 
+        #GZIP the nii file
         gzip sprl.nii
 
         #Fix orientation issue if exists
@@ -205,14 +218,14 @@ sub_channel = input_subs
                     .map { n -> [
                                     n,
                                     new File("$nifti_dir/$n").list()
-                                                             .findAll { it.contains("SPRL-IN") || 
+                                                             .findAll { it.contains("SPRL-IN") ||
                                                                         it.contains("SPRL-OUT") }
                                                              .sort()
                                 ]
-                         }   
+                         }
                     .filter { !it[1].isEmpty() }
-                    .map { n -> [ 
-                                    
+                    .map { n -> [
+
                                     n[0],
                                     new File("$nifti_dir/${n[0]}/${n[1][0]}").toPath().toRealPath(),
                                     new File("$nifti_dir/${n[0]}/${n[1][1]}").toPath().toRealPath()
@@ -224,7 +237,7 @@ sub_channel = input_subs
 process gzip_nii {
 
     stageInMode 'copy'
-    
+
     input:
     set val(sub), file(sprlIN), file(sprlOUT) from sub_channel
 
@@ -233,7 +246,7 @@ process gzip_nii {
 
     shell:
     '''
-    gzip !{sprlIN} 
+    gzip !{sprlIN}
     gzip !{sprlOUT}
     '''
 
@@ -255,7 +268,7 @@ process reorient_bad {
     shell:
     '''
     #!/bin/bash
-    
+
     orientation=$(mri_info --orientation !{sprlIN})
 
     if [ "$orientation" = "PRS" ]; then
@@ -296,14 +309,14 @@ process run_feenics{
     publishDir "$params.out/${params.application}", \
                 mode: 'move',
                 saveAs: { "$sub" }
-    
+
     input:
     set val(sub), file("sprlIN.nii.gz"), file("sprlOUT.nii.gz") from oriented_subs
 
     output:
     file("exp/$sub") into melodic_out
     val "$sub" into pseudo_out
-    
+
     shell:
     '''
 
@@ -355,13 +368,13 @@ process run_icarus{
 
     publishDir "$params.out/${params.application}", \
                 mode: 'copy'
-             
+
     input:
     val "*" from pseudo_out.collect()
 
     output:
     val 'pseudo' into pseudo_out2
-    
+
     echo true
 
     shell:
