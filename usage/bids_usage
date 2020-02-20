@@ -25,6 +25,7 @@ OPTIONAL
 			($invocation)
 	--license	Freesurfer license to use
 			($license)
+	--help		Print this usage log
 
 SUPPORTED PROFILES
 	-profile kimel	Run on Kimel cluster

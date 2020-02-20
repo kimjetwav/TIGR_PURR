@@ -19,3 +19,4 @@ OPTIONAL
 			FeenICS on ($preartifact)
 	--simg		Container to use
 			($simg)
+	--help		Print this usage log

@@ -18,6 +18,7 @@ OPTIONAL
 			($echo1)
 	--echo2		Echo 2 Datman Tag
 			($echo2)
+	--help		Print this usage log
 
 SUPPORTED PROFILES
 	-profile kimel	Run on Kimel cluster
