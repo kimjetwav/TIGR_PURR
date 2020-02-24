@@ -1,5 +1,4 @@
-
-usage = file("${baseDir.getParent()}/usage/bids_usage"
+usage = file("${workflow.scriptFile.getParent()}/usage/bids_usage")
 bindings = [ "rewrite":"$params.rewrite",
              "subjects":"$params.subjects",
              "simg":"$params.simg",
@@ -204,6 +203,7 @@ process modify_invocation{
 
     out_file = '${sub}.json'
     invoke_file = '${params.invocation}'
+
     x = '${sub}'.replace('sub-','')
 
     with open(invoke_file,'r') as f:
@@ -225,7 +225,6 @@ process run_bids{
     output:
     val 'pseudo_output' into pseudo_output
 
-    echo true
     beforeScript "source /etc/profile"
     scratch true
 
