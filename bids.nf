@@ -4,7 +4,7 @@ bindings = [ "rewrite":"$params.rewrite",
              "simg":"$params.simg",
              "descriptor":"$params.descriptor",
              "invocation":"$params.invocation",
-             "license":"$params.license"]
+             "license":"$params.license" ]
 engine = new groovy.text.SimpleTemplateEngine()
 toprint = engine.createTemplate(usage.text).make(bindings)
 printhelp = params.help
@@ -76,6 +76,8 @@ sub_channel = Channel.create()
 input_dirs = new File(params.bids).list()
 output_dirs = new File(params.out).list()
 
+dataset_object_channel = Channel.create()
+
 // Filter if rewrite
 if (!params.rewrite){
 
@@ -112,8 +114,8 @@ if (params.subjects){
         val available_subs from bids_channel.collect()
 
         output:
-        file 'valid' into valid_subs
-        file 'invalid' optional true into invalid_subs
+        path 'valid' into valid_subs
+        path 'invalid' optional true into invalid_subs
 
 
         """
@@ -135,12 +137,12 @@ if (params.subjects){
         valid_subs = [x for x in input_subs if x in bids_subs]
         invalid_subs = [x for x in input_subs if x not in valid_subs]
 
-        with open('valid','w') as f:
+        with open('valid', 'w') as f:
             f.writelines("\\n".join(valid_subs))
 
         if invalid_subs:
 
-            with open('invalid','w') as f:
+            with open('invalid', 'w') as f:
                 f.writelines("\\n".join(invalid_subs))
                 f.write("\\n")
 
@@ -156,76 +158,47 @@ if (params.subjects){
 
 }
 
-process save_invocation{
-
-    // Push input file into output folder
-
-    input:
-    file invocation from Channel.fromPath("$params.invocation")
-
-    shell:
-    '''
-
-    invoke_name=$(basename !{params.invocation})
-    invoke_name=${invoke_name%.json}
-    datestr=$(date +"%d-%m-%Y")
-
-    # If file with same date is available, check if they are the same
-    if [ -f !{params.out}/${invoke_name}_${datestr}.json ]; then
-
-        DIFF=$(diff !{params.invocation} !{params.out}/${invoke_name}_${datestr}.json)
-
-        if [ "$DIFF" != "" ]; then
-            >&2 echo "Error invocations have identical names but are not identical!"
-            exit 1
-        fi
-
-    else
-        cp -n !{params.invocation} !{params.out}/${invoke_name}_${datestr}.json
-    fi
-    '''
-}
-
 process modify_invocation{
 
     input:
     val sub from sub_channel
 
     output:
-    file "${sub}.json" into invoke_json
+    path "${sub}.json" into invoke_json
 
     """
 
     #!/usr/bin/env python
 
     import json
-    import sys
 
     out_file = '${sub}.json'
     invoke_file = '${params.invocation}'
 
-    x = '${sub}'.replace('sub-','')
+    x = '${sub}'.replace('sub-', '')
 
-    with open(invoke_file,'r') as f:
+    with open(invoke_file, 'r') as f:
         j_dict = json.load(f)
 
-    j_dict.update({'participant_label' : [x]})
+    j_dict.update({'participant_label': [x]})
 
-    with open(out_file,'w') as f:
-        json.dump(j_dict,f,indent=4)
+    with open(out_file, 'w') as f:
+        json.dump(j_dict, f, indent=4)
 
     """
+
 }
 
 process run_bids{
 
     input:
-    file sub_input from invoke_json
+    path sub_input from invoke_json
 
     output:
-    val 'pseudo_output' into pseudo_output
+    path '${PWD}/out/*' into dataset_object_channel
 
     beforeScript "source /etc/profile"
+    stageInMode 'symlink'
     scratch true
 
     module 'slurm'
@@ -235,25 +208,25 @@ process run_bids{
     #Stop error rejection
     set +e
 
+    #Set up working directory
+    sub_json=!{sub_input}
+    sub=${sub_json%.json}
+    nf_workdir=${PWD}/out
+
+    #Make logging output
+    logging_dir=${nf_workdir}/pipeline_logs/!{params.application}
+    log_out=${logging_dir}/${sub}.out
+    log_err=${logging_dir}/${sub}.err
+    mkdir -p ${logging_dir}
+
     echo !{sub_input}
 
     echo bosh exec launch \
     -v !{params.bids}:/bids \
-    -v !{params.out}:/output \
+    -v ${nf_workdir}:/output \
     -v !{params.license}:/license \
-    !{params.descriptor} $(pwd)/!{sub_input} \
+    !{params.descriptor} ${PWD}/!{sub_input} \
     --imagepath !{params.simg} -x --stream
-
-    #Make logging folder
-    logging_dir=!{params.out}/pipeline_logs/!{params.application}
-    mkdir -p ${logging_dir}
-
-    #Set up logging output
-    sub_json=!{sub_input}
-    sub=${sub_json%.json}
-    log_out=${logging_dir}/${sub}.out
-    log_err=${logging_dir}/${sub}.err
-
 
     echo "TASK ATTEMPT !{task.attempt}" >> ${log_out}
     echo "============================" >> ${log_out}
@@ -262,11 +235,44 @@ process run_bids{
 
     bosh exec launch \
     -v !{params.bids}:/bids \
-    -v !{params.out}:/output \
+    -v ${nf_workdir}:/output \
     -v !{params.license}:/license \
-    !{params.descriptor} $(pwd)/!{sub_input} \
-    --imagepath !{params.simg} -x --stream 2>> ${log_out} \
-                                           1>> ${log_err}
+    !{params.descriptor} ${PWD}/!{sub_input} \
+    --imagepath !{params.simg} -x --stream 1>> ${log_out} \
+                                           2>> ${log_err}
 
     '''
+
+}
+
+process dataset_store{
+
+    input:
+    path '*' from dataset_object_channel.collect()
+    path invocation from Channel.fromPath("$params.invocation")
+    path commit_json from Channel.fromPath("$params.TODO_DUMMY_JSON")
+
+    stageInMode 'symlink'
+
+    shell:
+    '''
+
+    datestr="$(date -I)"
+    invocation_object="$(basename -s '.json' !{params.invocation})_${datestr}"
+    invocation_transobject="!{params.out}/${invocation}.json"
+    report_transobject="!{params.out}/${invocation/_invocation/}.html"
+
+    objects="`find out -type f -printf '%p ' | sed 's|out|!{params.out}/|g'`"
+    canonical_dataset_objects="`readlink -e ${objects}`"
+    dataset_transobjects="${objects} ${invoke_name}"
+    finalised_dataset_transobjects="${dataset_transobjects} ${report_name}"
+
+    echo '(datalad unlock "${canonical_dataset_objects}"
+           install -g kimel_data -CD "${dataset_transobjects}" -t !{params.out}
+           cd !{params.out}
+           datalad save -S "${finalised_dataset_transobjects}")' \
+               | at -M now+1minute
+
+    '''
+
 }
